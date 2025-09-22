@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "baseis", "baseis.csproj", "{100FCB58-8BBA-A98F-29DD-E5E1CC41FA3D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{100FCB58-8BBA-A98F-29DD-E5E1CC41FA3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100FCB58-8BBA-A98F-29DD-E5E1CC41FA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100FCB58-8BBA-A98F-29DD-E5E1CC41FA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100FCB58-8BBA-A98F-29DD-E5E1CC41FA3D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4CEE6277-DFE9-4D9D-B972-F7E61A8BB759}
+	EndGlobalSection
+EndGlobal

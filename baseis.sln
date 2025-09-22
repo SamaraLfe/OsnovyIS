@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "baseis", "baseis\baseis.csproj", "{02D43AC2-39A4-420A-8BB4-6214E9669178}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02D43AC2-39A4-420A-8BB4-6214E9669178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02D43AC2-39A4-420A-8BB4-6214E9669178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02D43AC2-39A4-420A-8BB4-6214E9669178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02D43AC2-39A4-420A-8BB4-6214E9669178}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
