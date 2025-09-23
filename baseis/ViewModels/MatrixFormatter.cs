@@ -39,11 +39,12 @@ namespace baseis.ViewModels
                 for (int x = 0; x < limit; x++)
                 {
                     int value = (int)System.Math.Round(matrix[classIndex, y, x]);
-                    sb.AppendFormat("{0,4}", value);
+                    sb.Append(value);
+                    sb.Append(' ');
                 }
                 if (limit < 100)
                 {
-                    sb.Append("   ...");
+                    sb.Append("...");
                 }
                 sb.AppendLine();
             }
@@ -79,11 +80,11 @@ namespace baseis.ViewModels
                 }
 
                 sb.Append(" | NDK=");
-                sb.Append(((int)System.Math.Round(ndk[classIndex, feature])).ToString());
+                sb.Append((int)System.Math.Round(ndk[classIndex, feature]));
                 sb.Append(" VDK=");
-                sb.Append(((int)System.Math.Round(vdk[classIndex, feature])).ToString());
+                sb.Append((int)System.Math.Round(vdk[classIndex, feature]));
                 sb.Append(" AVG=");
-                sb.Append(avg[classIndex, feature].ToString("F2"));
+                sb.Append(avg[classIndex, feature].ToString("F1"));
                 sb.AppendLine();
             }
 

@@ -52,20 +52,13 @@ namespace baseis.ViewModels
             var xm = _viewModel.GetXmMatrix();
             var trainingImages = _viewModel.GetTrainingImages();
 
-            if (trainingImages.Count < 2)
-            {
-                return;
-            }
-
             try
             {
-                int width1 = trainingImages[0].PixelSize.Width;
                 int height1 = trainingImages[0].PixelSize.Height;
-                int width2 = trainingImages[1].PixelSize.Width;
                 int height2 = trainingImages[1].PixelSize.Height;
 
-                var referenceImage1 = CreateReferenceImage(xm, 0, width1, height1);
-                var referenceImage2 = CreateReferenceImage(xm, 1, width2, height2);
+                var referenceImage1 = CreateReferenceImage(xm, 0, height1);
+                var referenceImage2 = CreateReferenceImage(xm, 1, height2);
 
                 _viewModel.SetReferenceVectorsVisualization1(referenceImage1);
                 _viewModel.SetReferenceVectorsVisualization2(referenceImage2);
@@ -79,7 +72,7 @@ namespace baseis.ViewModels
         }
 
         // Отрисовка эталонного вектора
-        private Bitmap CreateReferenceImage(int[,] xm, int classIndex, int width, int height)
+        private Bitmap CreateReferenceImage(int[,] xm, int classIndex, int height)
         {
             using var image = new Image<Rgba32>(1, height);
             

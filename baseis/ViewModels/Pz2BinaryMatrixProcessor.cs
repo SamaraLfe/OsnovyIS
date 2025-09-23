@@ -64,11 +64,6 @@ namespace baseis.ViewModels
             var X = _viewModel.GetXMatrix();
             var trainingImages = _viewModel.GetTrainingImages();
 
-            if (trainingImages.Count < 2)
-            {
-                return;
-            }
-
             try
             {
                 int width1 = trainingImages[0].PixelSize.Width;

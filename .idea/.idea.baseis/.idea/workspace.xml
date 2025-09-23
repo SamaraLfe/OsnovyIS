@@ -9,17 +9,9 @@
   <component name="ChangeListManager">
     <list default="true" id="7701aed9-3f09-4c9a-84be-59d5a212e11a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/FullMatricesViewModel.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz1ImageLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz1ImageLoader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz1TrainingMatrixBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz1TrainingMatrixBuilder.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/Views/FullMatricesWindow.axaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/Views/FullMatricesWindow.axaml.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/baseis.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/baseis.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +99,7 @@
       <workItem from="1758002792290" duration="10093000" />
       <workItem from="1758095531567" duration="651000" />
       <workItem from="1758568026076" duration="11181000" />
-      <workItem from="1758607939509" duration="7159000" />
+      <workItem from="1758607939509" duration="8474000" />
     </task>
     <servers />
   </component>
