@@ -42,7 +42,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Загруженное изображение" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Бинарное изображение" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="0" Grid.Column="2" Text="Изображение вектора" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Столбец матрицы вектора" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ReferenceHeaderClass0}" HorizontalAlignment="Center"/>
 
                         <Border Grid.Row="1" Grid.Column="0" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
                             <Image Source="{Binding SourceImage1}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -66,7 +66,7 @@
 
                     <!-- Обучающаяся матрица класса 0 -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Обучающаяся матрица" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding TrainingHeaderClass0}" FontWeight="Bold" Margin="0,0,10,0"/>
                         <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass0Command}" Padding="5,2"
                                 HorizontalAlignment="Right"/>
                     </StackPanel>
@@ -80,7 +80,7 @@
 
                     <!-- Бинарная матрица класса 0 -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Бинарная матрица" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding BinaryHeaderClass0}" FontWeight="Bold" Margin="0,0,10,0"/>
                         <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass0Command}" Padding="5,2"
                                 HorizontalAlignment="Right"/>
                     </StackPanel>
@@ -102,7 +102,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Загруженное изображение" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Бинарное изображение" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="0" Grid.Column="2" Text="Изображение вектора" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Столбец матрицы вектора" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ReferenceHeaderClass1}" HorizontalAlignment="Center"/>
 
                         <Border Grid.Row="1" Grid.Column="0" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
                             <Image Source="{Binding SourceImage2}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -126,7 +126,7 @@
 
                     <!-- Обучающаяся матрица класса 1 -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Обучающаяся матрица" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding TrainingHeaderClass1}" FontWeight="Bold" Margin="0,0,10,0"/>
                         <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass1Command}" Padding="5,2"
                                 HorizontalAlignment="Right"/>
                     </StackPanel>
@@ -140,7 +140,7 @@
 
                     <!-- Бинарная матрица класса 1 -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Бинарная матрица" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding BinaryHeaderClass1}" FontWeight="Bold" Margin="0,0,10,0"/>
                         <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass1Command}" Padding="5,2"
                                 HorizontalAlignment="Right"/>
                     </StackPanel>

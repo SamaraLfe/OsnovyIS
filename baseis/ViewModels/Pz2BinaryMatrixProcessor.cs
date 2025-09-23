@@ -27,7 +27,6 @@ namespace baseis.ViewModels
             int delta = _viewModel.GetDelta();
             var ndkMatrix = new double[2, 100];
             var vdkMatrix = new double[2, 100];
-            var avgMatrix = new double[2, 100];
 
             for (int k = 0; k < 2; k++)
             {
@@ -38,7 +37,7 @@ namespace baseis.ViewModels
                     {
                         sum += Y[k, i, j];
                     }
-                    double mean = sum / 100;
+                    double mean = sum / 100.0;
 
                     double ndk = mean - delta;
                     double vdk = mean + delta;
@@ -47,30 +46,16 @@ namespace baseis.ViewModels
 
                     for (int j = 0; j < 100; j++)
                     {
-                        X[k, i, j] = (ndk <= Y[k, i, j] && Y[k, i, j] <= vdk) ? 1 : 0;
+                        int bit = (ndk <= Y[k, i, j] && Y[k, i, j] <= vdk) ? 1 : 0;
+                        X[k, i, j] = bit;
                     }
                 }
             }
 
-            // Вычисляем средние значения для бинарной матрицы
-            for (int k = 0; k < 2; k++)
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    double sum = 0;
-                    for (int j = 0; j < 100; j++)
-                    {
-                        sum += X[k, i, j];
-                    }
-                    avgMatrix[k, i] = sum / 100;
-                }
-            }
 
             _viewModel.SetXMatrix(X);
             _viewModel.SetNdkMatrix(ndkMatrix);
             _viewModel.SetVdkMatrix(vdkMatrix);
-            _viewModel.SetAvgMatrix(avgMatrix);
-            _viewModel.SetCanShowBinaryMatrix(true);
         }
 
         // Отрисовка бинарной матрицы X
@@ -97,8 +82,10 @@ namespace baseis.ViewModels
                 _viewModel.SetBinaryMatrixVisualization1(binaryImage1);
                 _viewModel.SetBinaryMatrixVisualization2(binaryImage2);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                // Логируем ошибку визуализации бинарной матрицы
+                System.Diagnostics.Debug.WriteLine($"Ошибка визуализации бинарной матрицы: {ex.Message}");
                 return;
             }
         }
@@ -113,13 +100,7 @@ namespace baseis.ViewModels
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int scaledX = (int)((double)x / width * 100);
-                    int scaledY = (int)((double)y / height * 100);
-                    
-                    scaledX = Math.Min(scaledX, 99);
-                    scaledY = Math.Min(scaledY, 99);
-
-                    var binaryColor = X[classIndex, scaledY, scaledX] == 1 
+                    var binaryColor = X[classIndex, y, x] == 1 
                         ? new Rgba32(255, 255, 255)
                         : new Rgba32(0, 0, 0);
                     

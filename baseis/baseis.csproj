@@ -27,10 +27,5 @@
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="Views\FullMatricesWindow.axaml.cs">
-        <DependentUpon>FullMatricesWindow.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-    </ItemGroup>
+    
 </Project>

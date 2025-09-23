@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using SixLabors.ImageSharp;
@@ -11,7 +10,7 @@ namespace baseis.ViewModels
 {
     // Загрузка изображения
     /// <summary>
-    /// Практическое занятие 1. Загрузка исходных изображений и подготовка сведений о матрицах яркости.
+    /// Практическое занятие 1. Загрузка исходных изображений.
     /// </summary>
     public class Pz1ImageLoader
     {
@@ -26,13 +25,8 @@ namespace baseis.ViewModels
         {
             try
             {
-                var window = GetWindow();
-                if (window == null)
-                {
-                    return;
-                }
-
-                var storageProvider = window.StorageProvider;
+                var storageProvider = GetWindow()?.StorageProvider;
+                if (storageProvider == null) return;
                 var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
                     Title = imageIndex == 0 ? "Выберите первое изображение" : "Выберите второе изображение",
@@ -49,23 +43,15 @@ namespace baseis.ViewModels
                 if (files != null && files.Count > 0)
                 {
                     using var stream = await files[0].OpenReadAsync();
-                    var bitmap = new Bitmap(stream);
+                    using var bitmap = new Bitmap(stream);
+
+                    // Нормируем изображение к размерам матриц (n x N)
+                    int targetWidth = _viewModel.Getn();   // столбцы
+                    int targetHeight = _viewModel.GetN();  // строки
+                    var normalizedBitmap = NormalizeBitmap(bitmap, targetWidth, targetHeight);
 
                     if (imageIndex == 0)
                     {
-                        // Нормируем изображение к 100x100
-                        using var memStream = new MemoryStream();
-                        bitmap.Save(memStream);
-                        memStream.Position = 0;
-                        using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(memStream);
-                        using var normalized = image.Clone(ctx => ctx.Resize(100, 100));
-                        
-                        // Создаем новый Bitmap из нормированного изображения
-                        using var normalizedStream = new MemoryStream();
-                        normalized.SaveAsPng(normalizedStream);
-                        normalizedStream.Position = 0;
-                        var normalizedBitmap = new Bitmap(normalizedStream);
-                        
                         _viewModel.SourceImage1 = normalizedBitmap;
                         _viewModel.GetTrainingImages().Clear();
                         _viewModel.GetTrainingImages().Add(normalizedBitmap);
@@ -76,19 +62,6 @@ namespace baseis.ViewModels
                     }
                     else
                     {
-                        // Нормируем изображение к 100x100
-                        using var memStream = new MemoryStream();
-                        bitmap.Save(memStream);
-                        memStream.Position = 0;
-                        using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(memStream);
-                        using var normalized = image.Clone(ctx => ctx.Resize(100, 100));
-                        
-                        // Создаем новый Bitmap из нормированного изображения
-                        using var normalizedStream = new MemoryStream();
-                        normalized.SaveAsPng(normalizedStream);
-                        normalizedStream.Position = 0;
-                        var normalizedBitmap = new Bitmap(normalizedStream);
-                        
                         _viewModel.SourceImage2 = normalizedBitmap;
                         _viewModel.GetTrainingImages().Add(normalizedBitmap);
 
@@ -98,19 +71,34 @@ namespace baseis.ViewModels
                     }
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                // Ошибка обрабатывается автоматически
+                // Логируем ошибку загрузки изображения
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки изображения {imageIndex}: {ex.Message}");
             }
         }
 
-        private Window? GetWindow()
+        private static Avalonia.Controls.Window? GetWindow()
         {
             if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
             {
                 return desktop.MainWindow;
             }
             return null;
+        }
+
+        private static Bitmap NormalizeBitmap(Bitmap source, int width, int height)
+        {
+            using var memStream = new MemoryStream();
+            source.Save(memStream);
+            memStream.Position = 0;
+            using var image = Image.Load<Rgba32>(memStream);
+            using var normalized = image.Clone(ctx => ctx.Resize(width, height));
+
+            using var normalizedStream = new MemoryStream();
+            normalized.SaveAsPng(normalizedStream);
+            normalizedStream.Position = 0;
+            return new Bitmap(normalizedStream);
         }
     }
 }

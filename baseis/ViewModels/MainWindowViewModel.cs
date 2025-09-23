@@ -1,10 +1,6 @@
-﻿using Avalonia.Controls;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using System.IO;
 using System.Collections.Generic;
 using System;
 
@@ -22,9 +18,10 @@ namespace baseis.ViewModels
     {
         #region Константы
         private const int m = 2;        // Количество классов
-        private const int N = 100;      // Размер по вертикали (строки)
-        private const int n = 100;      // Размер по горизонтали (столбцы)
-        private const int delta = 50;   // Порог для бинаризации
+        private const int N = 100;      // количество признаков распознавания (строки)
+        private const int n = 100;      //  количество реализаций (столбцы)
+        private const int delta = 50;   // контрольный допуск
+        private const double selec = 0.5; // уровень селекции
         #endregion
 
 
@@ -53,16 +50,15 @@ namespace baseis.ViewModels
         [ObservableProperty] private bool canCalculate = false;
         [ObservableProperty] private bool canShowDetails = false;
         [ObservableProperty] private bool canClear = false;
-        [ObservableProperty] private bool canShowBinaryMatrix = false;
         [ObservableProperty] private double matrixFontSize = 10;
         #endregion
 
         #region Данные матриц
-        private double[,,] Y = new double[m, N, n];           // Обучающая матрица Y[2,100,100]
-        private int[,,] X = new int[m, N, n];                 // Бинарная матрица X[2,100,100]
-        private int[,] xm = new int[m, N];                    // Эталонные векторы xm[2,100]
-        private double[,] _ndkMatrix = new double[m, N];      // Нижние границы NDK[2,100]
-        private double[,] _vdkMatrix = new double[m, N];      // Верхние границы VDK[2,100]
+        private double[,,] Y = new double[m, N, n];           // Входная обучающая матрица Y[2,100,100]
+        private int[,,] X = new int[m, N, n];                 // Бинарная учебная матрица X[2,100,100]
+        private int[,] xm = new int[m, N];                    // центры классов (Эталонные векторы) xm[2,100]
+        private double[,] _ndkMatrix = new double[m, N];      // Нижние системы допусков NDK[2,100]
+        private double[,] _vdkMatrix = new double[m, N];      // Верхние системы допусков VDK[2,100]
         private double[,] _avgMatrix = new double[m, N];      // Средние значения AVG[2,100]
         private List<Bitmap> _trainingImages = new List<Bitmap>();
         #endregion
@@ -80,15 +76,14 @@ namespace baseis.ViewModels
         private RelayCommand? _loadFirstCommand;
         private RelayCommand? _loadSecondCommand;
         private RelayCommand? _clearCommand;
-        private RelayCommand? _showSourceDetailsCommand;
-        private RelayCommand? _showSecondImageDetailsCommand;
+        
         private RelayCommand? _showTrainingDetailsClass0Command;
         private RelayCommand? _showTrainingDetailsClass1Command;
         private RelayCommand? _showBinaryDetailsClass0Command;
         private RelayCommand? _showBinaryDetailsClass1Command;
         private RelayCommand? _showReferenceDetailsClass0Command;
         private RelayCommand? _showReferenceDetailsClass1Command;
-        private RelayCommand? _visualizeBinaryMatrixCommand;
+        
         #endregion
 
         #region Конструктор
@@ -99,7 +94,7 @@ namespace baseis.ViewModels
             _trainingMatrixBuilder = new Pz1TrainingMatrixBuilder(this);
             _binaryMatrixProcessor = new Pz2BinaryMatrixProcessor(this);
             _referenceVectorCalculator = new Pz3ReferenceVectorCalculator(this);
-            _matrixFormatter = new MatrixFormatter(this);
+            _matrixFormatter = new MatrixFormatter();
 
             // Инициализация команд
             InitializeCommands();
@@ -111,15 +106,23 @@ namespace baseis.ViewModels
         public IRelayCommand LoadSecondCommand => _loadSecondCommand!;
         public IRelayCommand CalculateCommand => _calculateCommand!;
         public IRelayCommand ClearCommand => _clearCommand!;
-        public IRelayCommand ShowSourceDetailsCommand => _showSourceDetailsCommand!;
-        public IRelayCommand ShowSecondImageDetailsCommand => _showSecondImageDetailsCommand!;
+        
         public IRelayCommand ShowTrainingDetailsClass0Command => _showTrainingDetailsClass0Command!;
         public IRelayCommand ShowTrainingDetailsClass1Command => _showTrainingDetailsClass1Command!;
         public IRelayCommand ShowBinaryDetailsClass0Command => _showBinaryDetailsClass0Command!;
         public IRelayCommand ShowBinaryDetailsClass1Command => _showBinaryDetailsClass1Command!;
         public IRelayCommand ShowReferenceDetailsClass0Command => _showReferenceDetailsClass0Command!;
         public IRelayCommand ShowReferenceDetailsClass1Command => _showReferenceDetailsClass1Command!;
-        public IRelayCommand VisualizeBinaryMatrixCommand => _visualizeBinaryMatrixCommand!;
+        
+        #endregion
+
+        #region Публичные свойства UI заголовков
+        public string TrainingHeaderClass0 => "Обучающаяся матрица (K=0)";
+        public string TrainingHeaderClass1 => "Обучающаяся матрица (K=1)";
+        public string BinaryHeaderClass0 => $"Бинарная матрица (K=0, delta = {delta})";
+        public string BinaryHeaderClass1 => $"Бинарная матрица (K=1, delta = {delta})";
+        public string ReferenceHeaderClass0 => $"Эталонный вектор (K=0, p = {selec})";
+        public string ReferenceHeaderClass1 => $"Эталонный вектор (K=1, p = {selec})";
         #endregion
 
         #region Публичные методы доступа к данным
@@ -131,6 +134,9 @@ namespace baseis.ViewModels
         public double[,] GetAvgMatrix() => _avgMatrix;
         public List<Bitmap> GetTrainingImages() => _trainingImages;
         public int GetDelta() => delta;
+        public double GetSelec() => selec;
+        public int GetN() => N; 
+        public int Getn() => n;  
         #endregion
 
         #region Публичные методы установки данных
@@ -144,7 +150,6 @@ namespace baseis.ViewModels
         public void SetBinaryMatrixVisualization2(Bitmap? value) => BinaryMatrixVisualization2 = value;
         public void SetReferenceVectorsVisualization1(Bitmap? value) => ReferenceVectorsVisualization1 = value;
         public void SetReferenceVectorsVisualization2(Bitmap? value) => ReferenceVectorsVisualization2 = value;
-        public void SetCanShowBinaryMatrix(bool value) => CanShowBinaryMatrix = value;
         #endregion
 
         #region Обработчики изменений свойств
@@ -152,8 +157,6 @@ namespace baseis.ViewModels
         partial void OnCanLoadSecondChanged(bool value) => _loadSecondCommand?.NotifyCanExecuteChanged();
         partial void OnCanCalculateChanged(bool value) => _calculateCommand?.NotifyCanExecuteChanged();
         partial void OnCanClearChanged(bool value) => _clearCommand?.NotifyCanExecuteChanged();
-        partial void OnSourceImage1Changed(Bitmap? value) => _showSourceDetailsCommand?.NotifyCanExecuteChanged();
-        partial void OnSourceImage2Changed(Bitmap? value) => _showSecondImageDetailsCommand?.NotifyCanExecuteChanged();
         partial void OnCanShowDetailsChanged(bool value)
         {
             _showTrainingDetailsClass0Command?.NotifyCanExecuteChanged();
@@ -163,7 +166,7 @@ namespace baseis.ViewModels
             _showReferenceDetailsClass0Command?.NotifyCanExecuteChanged();
             _showReferenceDetailsClass1Command?.NotifyCanExecuteChanged();
         }
-        partial void OnCanShowBinaryMatrixChanged(bool value) => _visualizeBinaryMatrixCommand?.NotifyCanExecuteChanged();
+        
         #endregion
 
         #region Приватные методы
@@ -176,15 +179,13 @@ namespace baseis.ViewModels
             _loadSecondCommand = new RelayCommand(LoadSecondImage, () => CanLoadSecond);
             _calculateCommand = new RelayCommand(Calculate, () => CanCalculate);
             _clearCommand = new RelayCommand(ClearAll, () => CanClear);
-            _showSourceDetailsCommand = new RelayCommand(ShowSourceDetails, () => SourceImage1 != null);
-            _showSecondImageDetailsCommand = new RelayCommand(ShowSecondImageDetails, () => SourceImage2 != null);
             _showTrainingDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Обучающая матрица Y"), () => CanShowDetails);
             _showTrainingDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Обучающая матрица Y"), () => CanShowDetails);
             _showBinaryDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Бинарная матрица X"), () => CanShowDetails);
             _showBinaryDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Бинарная матрица X"), () => CanShowDetails);
             _showReferenceDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Эталонный вектор"), () => CanShowDetails);
             _showReferenceDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Эталонный вектор"), () => CanShowDetails);
-            _visualizeBinaryMatrixCommand = new RelayCommand(VisualizeBinaryMatrix, () => CanShowBinaryMatrix);
+            
         }
 
         /// <summary>
@@ -204,56 +205,18 @@ namespace baseis.ViewModels
                     break;
                 case "Бинарная матрица X":
                     sb.AppendLine(MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), classIndex, 100));
+                    sb.AppendLine($"delta = {GetDelta()}");
                     break;
                 case "Эталонный вектор":
                     sb.AppendLine(MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), classIndex, 100));
+                    sb.AppendLine($"p = {GetSelec()}");
                     break;
             }
 
             _matrixFormatter.ShowDetailsWindow($"{matrixType} - Класс {classIndex}", sb.ToString());
         }
 
-        /// <summary>
-        /// Показывает детали первого изображения
-        /// </summary>
-        private void ShowSourceDetails()
-        {
-            ShowImageDetails(0, "ПЕРВОЕ ИЗОБРАЖЕНИЕ");
-        }
-
-        /// <summary>
-        /// Показывает детали второго изображения
-        /// </summary>
-        private void ShowSecondImageDetails()
-        {
-            ShowImageDetails(1, "ВТОРОЕ ИЗОБРАЖЕНИЕ");
-        }
-
-        /// <summary>
-        /// Универсальный метод для отображения деталей изображений
-        /// </summary>
-        private void ShowImageDetails(int imageIndex, string title)
-        {
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine($"МАТРИЦА {title}");
-            sb.AppendLine(new string('=', title.Length + 8));
-            sb.AppendLine();
-
-            if (GetTrainingImages().Count > imageIndex)
-            {
-                using var stream = new System.IO.MemoryStream();
-                GetTrainingImages()[imageIndex].Save(stream);
-                stream.Position = 0;
-                using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(stream);
-                sb.AppendLine(MatrixFormatter.GetFullPixelMatrix(image, $"{title} (нормировано 100x100)"));
-            }
-            else
-            {
-                sb.AppendLine("Изображение не загружено");
-            }
-
-            _matrixFormatter.ShowDetailsWindow($"Матрица {title.ToLower()}", sb.ToString());
-        }
+        
 
         /// <summary>
         /// Очищает все данные и сбрасывает состояние интерфейса
@@ -288,7 +251,6 @@ namespace baseis.ViewModels
             CanLoadSecond = false;
             CanCalculate = false;
             CanShowDetails = false;
-            CanShowBinaryMatrix = false;
             CanClear = false;
         }
 
@@ -308,7 +270,6 @@ namespace baseis.ViewModels
             ReferenceVectorsVisualization1 = null;
             ReferenceVectorsVisualization2 = null;
             CanShowDetails = false;
-            CanShowBinaryMatrix = false;
             ReferenceVectors = "";
         }
 
@@ -355,16 +316,17 @@ namespace baseis.ViewModels
                 UpdateMatrixDisplay();
 
                 // Визуализация результатов
-                VisualizeBinaryMatrix();
+                _binaryMatrixProcessor.VisualizeBinaryMatrix();
                 _referenceVectorCalculator.VisualizeReferenceVectors();
 
                 // Обновление состояния интерфейса
                 CanShowDetails = true;
                 CanClear = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Ошибка обрабатывается автоматически
+                // Логируем ошибку вычислений
+                System.Diagnostics.Debug.WriteLine($"Ошибка при выполнении вычислений: {ex.Message}");
             }
         }
 
@@ -375,20 +337,14 @@ namespace baseis.ViewModels
         {
             LearningMatrixClass0 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 0, 20);
             LearningMatrixClass1 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 1, 20);
-            BinaryMatrixClass0 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 0, 20);
-            BinaryMatrixClass1 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1, 20);
-            ReferenceVectorClass0 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 0, 100);
-            ReferenceVectorClass1 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 1, 100);
+            BinaryMatrixClass0 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 0, 20) + $"\ndelta = {GetDelta()}";
+            BinaryMatrixClass1 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1, 20) + $"\ndelta = {GetDelta()}";
+            ReferenceVectorClass0 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 0, 100) + $"\np = {GetSelec()}";
+            ReferenceVectorClass1 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 1, 100) + $"\np = {GetSelec()}";
             ReferenceVectors = MatrixFormatter.GetReferenceVectorsString(GetXmMatrix());
         }
 
-        /// <summary>
-        /// Запускает визуализацию бинарных матриц
-        /// </summary>
-        private void VisualizeBinaryMatrix()
-        {
-            _binaryMatrixProcessor.VisualizeBinaryMatrix();
-        }
+        
         #endregion
     }
 }

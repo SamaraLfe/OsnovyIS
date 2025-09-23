@@ -1,18 +1,16 @@
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System.Text;
 
 namespace baseis.ViewModels
 {
+    /// <summary>
+    /// Утилита форматирования матриц и показа окна деталей.
+    /// Содержит методы для преобразования матриц Y, X и xm в удобочитаемые строки.
+    /// </summary>
     public class MatrixFormatter
     {
-        private readonly MainWindowViewModel _viewModel;
-
-        public MatrixFormatter(MainWindowViewModel viewModel)
-        {
-            _viewModel = viewModel;
-        }
-
+        /// <summary>
+        /// Открывает окно с произвольным текстовым содержимым.
+        /// </summary>
         public void ShowDetailsWindow(string title, string content)
         {
             var detailsWindow = new Views.DetailsWindow
@@ -27,7 +25,10 @@ namespace baseis.ViewModels
             detailsWindow.Show();
         }
 
-        // Формирование обучающей матрицы Y
+        /// <summary>
+        /// Формирует текст для обучающей матрицы Y по заданному классу.
+        /// Показывает квадрат size x size (по умолчанию 100x100).
+        /// </summary>
         public static string GetLearningMatrixString(double[,,] matrix, int classIndex, int size = 100)
         {
             int limit = System.Math.Clamp(size, 1, 100);
@@ -55,7 +56,10 @@ namespace baseis.ViewModels
             return sb.ToString();
         }
 
-        // Формирование бинарной матрицы X
+        /// <summary>
+        /// Формирует текст для бинарной матрицы X по заданному классу, 
+        /// добавляя для каждой строки соответствующие NDK/VDK/AVG.
+        /// </summary>
         public static string GetBinaryMatrixString(int[,,] matrix, double[,] ndk, double[,] vdk, double[,] avg, int classIndex, int size = 100)
         {
             int limit = System.Math.Clamp(size, 1, 100);
@@ -91,6 +95,9 @@ namespace baseis.ViewModels
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Формирует текст для эталонного вектора (xm) указанного класса.
+        /// </summary>
         public static string GetReferenceVectorString(int[,] referenceVectors, int classIndex, int size = 100)
         {
             int limit = System.Math.Clamp(size, 1, 100);
@@ -109,7 +116,10 @@ namespace baseis.ViewModels
             return sb.ToString();
         }
 
-        // Формирование эталонного вектора EV геометрических центров классов распознавания
+        /// <summary>
+        /// Формирует текст для двух эталонных векторов (классы 0 и 1),
+        /// разделяя их пустой строкой.
+        /// </summary>
         public static string GetReferenceVectorsString(int[,] referenceVectors)
         {
             var sb = new StringBuilder();
@@ -122,52 +132,6 @@ namespace baseis.ViewModels
                 }
             }
             return sb.ToString();
-        }
-
-
-        public static string GetPixelMatrixPreview(Image<Rgba32> image, string title, int size = 20)
-        {
-            var sb = new StringBuilder();
-            if (!string.IsNullOrEmpty(title))
-            {
-                sb.AppendLine(title);
-            }
-            AppendImageMatrix(sb, image, size);
-            return sb.ToString();
-        }
-
-        public static string GetFullPixelMatrix(Image<Rgba32> image, string title)
-        {
-            var sb = new StringBuilder();
-            if (!string.IsNullOrEmpty(title))
-            {
-                sb.AppendLine(title);
-            }
-            AppendImageMatrix(sb, image, 100);
-            return sb.ToString();
-        }
-
-        private static void AppendImageMatrix(StringBuilder sb, Image<Rgba32> image, int size)
-        {
-            int limit = System.Math.Clamp(size, 1, 100);
-            for (int y = 0; y < limit; y++)
-            {
-                for (int x = 0; x < limit; x++)
-                {
-                    var pixel = image[x, y];
-                    int grayValue = (int)((pixel.R + pixel.G + pixel.B) / 3.0);
-                    sb.AppendFormat("{0,4}", grayValue);
-                }
-                if (limit < 100)
-                {
-                    sb.Append("   ...");
-                }
-                sb.AppendLine();
-            }
-            if (limit < 100)
-            {
-                sb.AppendLine("...");
-            }
         }
     }
 }

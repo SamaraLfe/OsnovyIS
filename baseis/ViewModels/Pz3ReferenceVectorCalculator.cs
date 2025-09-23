@@ -7,7 +7,6 @@ using System;
 
 namespace baseis.ViewModels
 {
-    // Формирование эталонного вектора EV геометрических центров классов распознавания
     /// <summary>
     /// Практическое занятие 3. Определение геометрических центров классов (эталонных векторов).
     /// </summary>
@@ -23,6 +22,9 @@ namespace baseis.ViewModels
         public void Compute()
         {
             var X = _viewModel.GetXMatrix();
+            var selec = _viewModel.GetSelec();
+
+            var avg = new double[2, 100];
             var xm = new int[2, 100];
 
             for (int k = 0; k < 2; k++)
@@ -34,11 +36,12 @@ namespace baseis.ViewModels
                     {
                         sum += X[k, i, j];
                     }
-                    double average = sum / 100;
-                    xm[k, i] = average > 0.5 ? 1 : 0;
+                    avg[k, i] = sum / 100.0;
+                    xm[k, i] = avg[k, i] > selec ? 1 : 0;
                 }
             }
 
+            _viewModel.SetAvgMatrix(avg);
             _viewModel.SetXmMatrix(xm);
             _viewModel.ReferenceVectors = MatrixFormatter.GetReferenceVectorsString(xm);
         }
@@ -67,8 +70,10 @@ namespace baseis.ViewModels
                 _viewModel.SetReferenceVectorsVisualization1(referenceImage1);
                 _viewModel.SetReferenceVectorsVisualization2(referenceImage2);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                // Логируем ошибку визуализации эталонных векторов
+                System.Diagnostics.Debug.WriteLine($"Ошибка визуализации эталонных векторов: {ex.Message}");
                 return;
             }
         }
@@ -80,20 +85,15 @@ namespace baseis.ViewModels
             
             for (int y = 0; y < height; y++)
             {
-                // Прямое соответствие: верх изображения = начало вектора
-                int scaledY = (int)((double)y / height * 100);
-                scaledY = Math.Min(scaledY, 99);
-
-                var referenceColor = xm[classIndex, scaledY] == 1
+                var referenceColor = xm[classIndex, y] == 1
                     ? new Rgba32(255, 255, 255)
                     : new Rgba32(0, 0, 0);
                 
                 image[0, y] = referenceColor;
             }
 
-            using var scaledImage = image.Clone(ctx => ctx.Resize(width, height));
             using var memoryStream = new MemoryStream();
-            scaledImage.SaveAsPng(memoryStream);
+            image.SaveAsPng(memoryStream);
             memoryStream.Position = 0;
             
             return new Bitmap(memoryStream);
