@@ -20,9 +20,9 @@ namespace baseis.ViewModels
         public void Build()
         {
             var Y = _viewModel.GetYMatrix();
-            var classCount = Y.GetLength(0);
-            var featureCount = Y.GetLength(1);
-            var realizationCount = Y.GetLength(2);
+            int classCount = Y.GetLength(0);
+            int featureCount = Y.GetLength(1);
+            int realizationCount = Y.GetLength(2);
 
             // Заполняем матрицу Y из загруженных изображений
             for (int k = 0; k < _viewModel.GetTrainingImages().Count && k < classCount; k++)

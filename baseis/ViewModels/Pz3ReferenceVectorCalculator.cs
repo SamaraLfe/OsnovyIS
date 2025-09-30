@@ -24,9 +24,9 @@ namespace baseis.ViewModels
             var X = _viewModel.GetXMatrix();
             var selec = _viewModel.GetSelec();
 
-            var classCount = X.GetLength(0);
-            var featureCount = X.GetLength(1);
-            var realizationCount = X.GetLength(2);
+            int classCount = X.GetLength(0);
+            int featureCount = X.GetLength(1);
+            int realizationCount = X.GetLength(2);
 
             var avg = new double[classCount, featureCount];
             var xm = new int[classCount, featureCount];
@@ -82,8 +82,8 @@ namespace baseis.ViewModels
             for (int y = 0; y < height; y++)
             {
                 var referenceColor = xm[classIndex, y] == 1
-                    ? new Rgba32(255, 255, 255)
-                    : new Rgba32(0, 0, 0);
+                    ? new Rgba32(0, 0, 0)
+                    : new Rgba32(255, 255, 255);
                 
                 image[0, y] = referenceColor;
             }

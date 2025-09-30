@@ -25,9 +25,9 @@ namespace baseis.ViewModels
             var Y = _viewModel.GetYMatrix();
             var X = _viewModel.GetXMatrix();
             var delta = _viewModel.GetDelta();
-            var classCount = X.GetLength(0);
-            var featureCount = X.GetLength(1);
-            var realizationCount = X.GetLength(2);
+            int classCount = X.GetLength(0);
+            int featureCount = X.GetLength(1);
+            int realizationCount = X.GetLength(2);
 
             var ndkMatrix = new double[classCount, featureCount];
             var vdkMatrix = new double[classCount, featureCount];
@@ -100,8 +100,8 @@ namespace baseis.ViewModels
                 for (int x = 0; x < width; x++)
                 {
                     var binaryColor = X[classIndex, y, x] == 1 
-                        ? new Rgba32(255, 255, 255)
-                        : new Rgba32(0, 0, 0);
+                        ? new Rgba32(0, 0, 0)
+                        : new Rgba32(255, 255, 255);
                     
                     image[x, y] = binaryColor;
                 }
