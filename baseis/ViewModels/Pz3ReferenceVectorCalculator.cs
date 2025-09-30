@@ -24,9 +24,9 @@ namespace baseis.ViewModels
             var X = _viewModel.GetXMatrix();
             var selec = _viewModel.GetSelec();
 
-            int classCount = X.GetLength(0);
-            int featureCount = X.GetLength(1);
-            int realizationCount = X.GetLength(2);
+            var classCount = X.GetLength(0);
+            var featureCount = X.GetLength(1);
+            var realizationCount = X.GetLength(2);
 
             var avg = new double[classCount, featureCount];
             var xm = new int[classCount, featureCount];

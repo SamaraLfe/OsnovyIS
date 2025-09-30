@@ -25,9 +25,9 @@ namespace baseis.ViewModels
             var Y = _viewModel.GetYMatrix();
             var X = _viewModel.GetXMatrix();
             var delta = _viewModel.GetDelta();
-            int classCount = X.GetLength(0);
-            int featureCount = X.GetLength(1);
-            int realizationCount = X.GetLength(2);
+            var classCount = X.GetLength(0);
+            var featureCount = X.GetLength(1);
+            var realizationCount = X.GetLength(2);
 
             var ndkMatrix = new double[classCount, featureCount];
             var vdkMatrix = new double[classCount, featureCount];
