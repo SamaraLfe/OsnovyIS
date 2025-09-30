@@ -97,41 +97,62 @@ namespace baseis.ViewModels
         }
 
         /// <summary>
-        /// Формирует текст для эталонного вектора (xm) указанного класса.
+        /// Формирует текст для эталонного вектора (xm) указанного класса
+        /// или всех классов, если класс не задан.
         /// </summary>
-        public static string GetReferenceVectorString(int[,] referenceVectors, int classIndex, int size = 100)
+        public static string GetReferenceVectorString(int[,] referenceVectors, int? classIndex = null, int size = 100)
         {
-            int limit = System.Math.Clamp(size, 1, 100);
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < limit; i++)
+            int vectorLength = referenceVectors.GetLength(1);
+            if (vectorLength == 0)
             {
-                sb.AppendLine(referenceVectors[classIndex, i].ToString());
+                return string.Empty;
             }
 
-            if (limit < 100)
+            int limit = System.Math.Clamp(size, 1, vectorLength);
+
+            int[] indices;
+            if (classIndex.HasValue)
             {
-                sb.AppendLine("...");
+                indices = new[] { classIndex.Value };
             }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Формирует текст для двух эталонных векторов (классы 0 и 1),
-        /// разделяя их пустой строкой.
-        /// </summary>
-        public static string GetReferenceVectorsString(int[,] referenceVectors)
-        {
-            var sb = new StringBuilder();
-            for (int k = 0; k < 2; k++)
+            else
             {
-                sb.AppendLine(GetReferenceVectorString(referenceVectors, k, 100));
-                if (k < 1)
+                int classCount = referenceVectors.GetLength(0);
+                if (classCount == 0)
                 {
+                    return string.Empty;
+                }
+
+                indices = new int[classCount];
+                for (int i = 0; i < classCount; i++)
+                {
+                    indices[i] = i;
+                }
+            }
+
+            var sb = new StringBuilder();
+
+            for (int index = 0; index < indices.Length; index++)
+            {
+                int currentClass = indices[index];
+
+                for (int i = 0; i < limit; i++)
+                {
+                    sb.AppendLine(referenceVectors[currentClass, i].ToString());
+                }
+
+                if (limit < vectorLength)
+                {
+                    sb.AppendLine("...");
+                }
+
+                if (index < indices.Length - 1)
+                {
+                    sb.AppendLine();
                     sb.AppendLine();
                 }
             }
+
             return sb.ToString();
         }
     }

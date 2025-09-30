@@ -24,27 +24,31 @@ namespace baseis.ViewModels
         {
             var Y = _viewModel.GetYMatrix();
             var X = _viewModel.GetXMatrix();
-            int delta = _viewModel.GetDelta();
-            var ndkMatrix = new double[2, 100];
-            var vdkMatrix = new double[2, 100];
+            var delta = _viewModel.GetDelta();
+            int classCount = X.GetLength(0);
+            int featureCount = X.GetLength(1);
+            int realizationCount = X.GetLength(2);
 
-            for (int k = 0; k < 2; k++)
+            var ndkMatrix = new double[classCount, featureCount];
+            var vdkMatrix = new double[classCount, featureCount];
+
+            for (int k = 0; k < classCount; k++)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < featureCount; i++)
                 {
                     double sum = 0;
-                    for (int j = 0; j < 100; j++)
+                    for (int j = 0; j < realizationCount; j++)
                     {
                         sum += Y[k, i, j];
                     }
-                    double mean = sum / 100.0;
+                    double mean = sum / realizationCount;
 
                     double ndk = mean - delta;
                     double vdk = mean + delta;
                     ndkMatrix[k, i] = ndk;
                     vdkMatrix[k, i] = vdk;
 
-                    for (int j = 0; j < 100; j++)
+                    for (int j = 0; j < realizationCount; j++)
                     {
                         int bit = (ndk <= Y[k, i, j] && Y[k, i, j] <= vdk) ? 1 : 0;
                         X[k, i, j] = bit;

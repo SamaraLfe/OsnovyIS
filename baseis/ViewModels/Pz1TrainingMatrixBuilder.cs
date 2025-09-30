@@ -20,9 +20,12 @@ namespace baseis.ViewModels
         public void Build()
         {
             var Y = _viewModel.GetYMatrix();
+            int classCount = Y.GetLength(0);
+            int featureCount = Y.GetLength(1);
+            int realizationCount = Y.GetLength(2);
+
             // Заполняем матрицу Y из загруженных изображений
-            
-            for (int k = 0; k < _viewModel.GetTrainingImages().Count && k < 2; k++)
+            for (int k = 0; k < _viewModel.GetTrainingImages().Count && k < classCount; k++)
             {
                 using var stream = new MemoryStream();
                 _viewModel.GetTrainingImages()[k].Save(stream);
@@ -30,9 +33,9 @@ namespace baseis.ViewModels
 
                 using var image = Image.Load<Rgba32>(stream);
                 
-                for (int y = 0; y < 100; y++)
+                for (int y = 0; y < featureCount; y++)
                 {
-                    for (int x = 0; x < 100; x++)
+                    for (int x = 0; x < realizationCount; x++)
                     {
                         var pixel = image[x, y];
                         Y[k, y, x] = (pixel.R + pixel.G + pixel.B) / 3.0;

@@ -7,9 +7,8 @@ using System;
 namespace baseis.ViewModels
 {
     /// <summary>
-    /// Главная ViewModel приложения для системы распознавания образов.
+    /// Главная ViewModel приложения.
     /// 
-    /// Управляет процессом обучения системы распознавания:
     /// ПЗ1: Загрузка изображений и формирование обучающей матрицы Y
     /// ПЗ2: Создание бинарной матрицы X и её визуализация
     /// ПЗ3: Вычисление эталонных векторов и их отображение
@@ -341,7 +340,7 @@ namespace baseis.ViewModels
             BinaryMatrixClass1 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1, 20) + $"\ndelta = {GetDelta()}";
             ReferenceVectorClass0 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 0, 100) + $"\np = {GetSelec()}";
             ReferenceVectorClass1 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 1, 100) + $"\np = {GetSelec()}";
-            ReferenceVectors = MatrixFormatter.GetReferenceVectorsString(GetXmMatrix());
+            ReferenceVectors = MatrixFormatter.GetReferenceVectorString(GetXmMatrix());
         }
 
         

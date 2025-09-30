@@ -24,26 +24,30 @@ namespace baseis.ViewModels
             var X = _viewModel.GetXMatrix();
             var selec = _viewModel.GetSelec();
 
-            var avg = new double[2, 100];
-            var xm = new int[2, 100];
+            int classCount = X.GetLength(0);
+            int featureCount = X.GetLength(1);
+            int realizationCount = X.GetLength(2);
 
-            for (int k = 0; k < 2; k++)
+            var avg = new double[classCount, featureCount];
+            var xm = new int[classCount, featureCount];
+
+            for (int k = 0; k < classCount; k++)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < featureCount; i++)
                 {
                     double sum = 0;
-                    for (int j = 0; j < 100; j++)
+                    for (int j = 0; j < realizationCount; j++)
                     {
                         sum += X[k, i, j];
                     }
-                    avg[k, i] = sum / 100.0;
+                    avg[k, i] = sum / realizationCount;
                     xm[k, i] = avg[k, i] > selec ? 1 : 0;
                 }
             }
 
             _viewModel.SetAvgMatrix(avg);
             _viewModel.SetXmMatrix(xm);
-            _viewModel.ReferenceVectors = MatrixFormatter.GetReferenceVectorsString(xm);
+            _viewModel.ReferenceVectors = MatrixFormatter.GetReferenceVectorString(xm);
         }
 
         // Отрисовка эталонного вектора
@@ -65,7 +69,6 @@ namespace baseis.ViewModels
             }
             catch (System.Exception ex)
             {
-                // Логируем ошибку визуализации эталонных векторов
                 System.Diagnostics.Debug.WriteLine($"Ошибка визуализации эталонных векторов: {ex.Message}");
                 return;
             }
