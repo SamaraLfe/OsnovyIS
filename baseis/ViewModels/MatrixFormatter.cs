@@ -27,31 +27,22 @@ namespace baseis.ViewModels
 
         /// <summary>
         /// Формирует текст для обучающей матрицы Y по заданному классу.
-        /// Показывает квадрат size x size (по умолчанию 100x100).
         /// </summary>
-        public static string GetLearningMatrixString(double[,,] matrix, int classIndex, int size = 100)
+        public static string GetLearningMatrixString(double[,,] matrix, int classIndex)
         {
-            int limit = System.Math.Clamp(size, 1, 100);
+            int rows = matrix.GetLength(1);
+            int cols = matrix.GetLength(2);
             var sb = new StringBuilder();
 
-            for (int y = 0; y < limit; y++)
+            for (int y = 0; y < rows; y++)
             {
-                for (int x = 0; x < limit; x++)
+                for (int x = 0; x < cols; x++)
                 {
                     int value = (int)System.Math.Round(matrix[classIndex, y, x]);
                     sb.Append(value);
                     sb.Append(' ');
                 }
-                if (limit < 100)
-                {
-                    sb.Append("...");
-                }
                 sb.AppendLine();
-            }
-
-            if (limit < 100)
-            {
-                sb.AppendLine("...");
             }
 
             return sb.ToString();
@@ -61,22 +52,18 @@ namespace baseis.ViewModels
         /// Формирует текст для бинарной матрицы X по заданному классу, 
         /// добавляя для каждой строки соответствующие NDK/VDK/AVG.
         /// </summary>
-        public static string GetBinaryMatrixString(int[,,] matrix, double[,] ndk, double[,] vdk, double[,] avg, int classIndex, int size = 100)
+        public static string GetBinaryMatrixString(int[,,] matrix, double[,] ndk, double[,] vdk, double[,] avg, int classIndex)
         {
-            int limit = System.Math.Clamp(size, 1, 100);
+            int rows = matrix.GetLength(1);
+            int cols = matrix.GetLength(2);
             var sb = new StringBuilder();
 
-            for (int feature = 0; feature < limit; feature++)
+            for (int feature = 0; feature < rows; feature++)
             {
-                for (int realization = 0; realization < limit; realization++)
+                for (int realization = 0; realization < cols; realization++)
                 {
                     sb.Append(matrix[classIndex, feature, realization]);
                     sb.Append(' ');
-                }
-
-                if (limit < 100)
-                {
-                    sb.Append("... ");
                 }
 
                 sb.Append(" | NDK=");
@@ -88,9 +75,36 @@ namespace baseis.ViewModels
                 sb.AppendLine();
             }
 
-            if (limit < 100)
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Формирует текст для матрицы допусков (NDK/VDK/AVG) указанного класса.
+        /// </summary>
+        public static string GetToleranceMatrixString(double[,] ndk, double[,] vdk, double[,] avg, int classIndex)
+        {
+            if (ndk == null || vdk == null || avg == null)
             {
-                sb.AppendLine("...");
+                return string.Empty;
+            }
+
+            if (classIndex < 0 || classIndex >= ndk.GetLength(0))
+            {
+                return string.Empty;
+            }
+
+            int featureCount = ndk.GetLength(1);
+            var sb = new StringBuilder();
+
+            for (int feature = 0; feature < featureCount; feature++)
+            {
+                sb.Append("NDK=");
+                sb.Append(ndk[classIndex, feature].ToString("F1"));
+                sb.Append("  VDK=");
+                sb.Append(vdk[classIndex, feature].ToString("F1"));
+                sb.Append("  AVG=");
+                sb.Append(avg[classIndex, feature].ToString("F2"));
+                sb.AppendLine();
             }
 
             return sb.ToString();
@@ -100,15 +114,13 @@ namespace baseis.ViewModels
         /// Формирует текст для эталонного вектора (xm) указанного класса
         /// или всех классов, если класс не задан.
         /// </summary>
-        public static string GetReferenceVectorString(int[,] referenceVectors, int? classIndex = null, int size = 100)
+        public static string GetReferenceVectorString(int[,] referenceVectors, int? classIndex = null)
         {
             int vectorLength = referenceVectors.GetLength(1);
             if (vectorLength == 0)
             {
                 return string.Empty;
             }
-
-            int limit = System.Math.Clamp(size, 1, vectorLength);
 
             int[] indices;
             if (classIndex.HasValue)
@@ -136,14 +148,9 @@ namespace baseis.ViewModels
             {
                 int currentClass = indices[index];
 
-                for (int i = 0; i < limit; i++)
+                for (int i = 0; i < vectorLength; i++)
                 {
                     sb.AppendLine(referenceVectors[currentClass, i].ToString());
-                }
-
-                if (limit < vectorLength)
-                {
-                    sb.AppendLine("...");
                 }
 
                 if (index < indices.Length - 1)
@@ -154,6 +161,73 @@ namespace baseis.ViewModels
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Формирует текстовое представление матрицы расстояний SK для выбранного класса.
+        /// </summary>
+        public static string GetDistanceMatrixString(int[,,] skMatrix, int classIndex)
+        {
+            if (skMatrix == null || skMatrix.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (classIndex < 0 || classIndex >= skMatrix.GetLength(0))
+            {
+                return string.Empty;
+            }
+
+            int totalRealizations = skMatrix.GetLength(2);
+            if (totalRealizations == 0)
+            {
+                return string.Empty;
+            }
+
+            int classCount = skMatrix.GetLength(1);
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"Расстояния до признаков своего класса K={classIndex}:");
+            AppendCodeDistanceRow(sb, skMatrix, classIndex, classIndex, totalRealizations);
+
+            for (int neighborIndex = 0; neighborIndex < classCount; neighborIndex++)
+            {
+                if (neighborIndex == classIndex)
+                {
+                    continue;
+                }
+
+                sb.AppendLine();
+                sb.AppendLine($"Расстояния до признаков класса K={neighborIndex}:");
+                AppendCodeDistanceRow(sb, skMatrix, classIndex, neighborIndex, totalRealizations);
+            }
+
+            return sb.ToString();
+        }
+
+        private static void AppendCodeDistanceRow(StringBuilder sb, int[,,] matrix, int classIndex, int rowIndex, int totalCount)
+        {
+            const int valuesPerLine = 20;
+
+            for (int realization = 0; realization < totalCount; realization++)
+            {
+                sb.Append(matrix[classIndex, rowIndex, realization]);
+
+                if (realization < totalCount - 1)
+                {
+                    sb.Append(' ');
+                }
+
+                if ((realization + 1) % valuesPerLine == 0)
+                {
+                    sb.AppendLine();
+                }
+            }
+
+            if (totalCount % valuesPerLine != 0)
+            {
+                sb.AppendLine();
+            }
         }
     }
 }

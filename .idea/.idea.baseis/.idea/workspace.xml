@@ -11,8 +11,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +53,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.github.x0x0b.codexlauncher.settings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -102,6 +101,10 @@
       <workItem from="1758568026076" duration="11181000" />
       <workItem from="1758607939509" duration="8705000" />
       <workItem from="1759221057307" duration="2019000" />
+      <workItem from="1759229080181" duration="5611000" />
+      <workItem from="1759235515876" duration="44000" />
+      <workItem from="1759833818561" duration="2499000" />
+      <workItem from="1759837284570" duration="4631000" />
     </task>
     <servers />
   </component>

@@ -12,6 +12,7 @@ namespace baseis.ViewModels
     /// ПЗ1: Загрузка изображений и формирование обучающей матрицы Y
     /// ПЗ2: Создание бинарной матрицы X и её визуализация
     /// ПЗ3: Вычисление эталонных векторов и их отображение
+    /// ПЗ4: Формирование массива кодовых расстояний
     /// </summary>
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -20,7 +21,7 @@ namespace baseis.ViewModels
         private const int N = 100;      // количество признаков распознавания (строки)
         private const int n = 100;      //  количество реализаций (столбцы)
         private const int delta = 50;   // контрольный допуск
-        private const double selec = 0.5; // уровень селекции
+        private const double selec = 0.63; // уровень селекции
         #endregion
 
 
@@ -32,6 +33,10 @@ namespace baseis.ViewModels
         [ObservableProperty] private string referenceVectorClass0 = "";
         [ObservableProperty] private string referenceVectorClass1 = "";
         [ObservableProperty] private string referenceVectors = "";
+        [ObservableProperty] private string distanceMatrixClass0 = "";
+        [ObservableProperty] private string distanceMatrixClass1 = "";
+        [ObservableProperty] private string toleranceMatrixClass0 = "";
+        [ObservableProperty] private string toleranceMatrixClass1 = "";
         #endregion
 
         #region Свойства интерфейса - Изображения
@@ -59,6 +64,7 @@ namespace baseis.ViewModels
         private double[,] _ndkMatrix = new double[m, N];      // Нижние системы допусков NDK[2,100]
         private double[,] _vdkMatrix = new double[m, N];      // Верхние системы допусков VDK[2,100]
         private double[,] _avgMatrix = new double[m, N];      // Средние значения AVG[2,100]
+        private int[,,] _skMatrix = new int[m, m, n];         // Матрицы расстояний SK[2,2,100]
         private List<Bitmap> _trainingImages = new List<Bitmap>();
         #endregion
 
@@ -67,6 +73,7 @@ namespace baseis.ViewModels
         private readonly Pz1TrainingMatrixBuilder _trainingMatrixBuilder;
         private readonly Pz2BinaryMatrixProcessor _binaryMatrixProcessor;
         private readonly Pz3ReferenceVectorCalculator _referenceVectorCalculator;
+        private readonly Pz4CodeDistanceAnalyzer _codeDistanceAnalyzer;
         private readonly MatrixFormatter _matrixFormatter;
         #endregion
 
@@ -82,6 +89,10 @@ namespace baseis.ViewModels
         private RelayCommand? _showBinaryDetailsClass1Command;
         private RelayCommand? _showReferenceDetailsClass0Command;
         private RelayCommand? _showReferenceDetailsClass1Command;
+        private RelayCommand? _showDistanceDetailsClass0Command;
+        private RelayCommand? _showDistanceDetailsClass1Command;
+        private RelayCommand? _showToleranceDetailsClass0Command;
+        private RelayCommand? _showToleranceDetailsClass1Command;
         
         #endregion
 
@@ -93,6 +104,7 @@ namespace baseis.ViewModels
             _trainingMatrixBuilder = new Pz1TrainingMatrixBuilder(this);
             _binaryMatrixProcessor = new Pz2BinaryMatrixProcessor(this);
             _referenceVectorCalculator = new Pz3ReferenceVectorCalculator(this);
+            _codeDistanceAnalyzer = new Pz4CodeDistanceAnalyzer(this);
             _matrixFormatter = new MatrixFormatter();
 
             // Инициализация команд
@@ -112,6 +124,10 @@ namespace baseis.ViewModels
         public IRelayCommand ShowBinaryDetailsClass1Command => _showBinaryDetailsClass1Command!;
         public IRelayCommand ShowReferenceDetailsClass0Command => _showReferenceDetailsClass0Command!;
         public IRelayCommand ShowReferenceDetailsClass1Command => _showReferenceDetailsClass1Command!;
+        public IRelayCommand ShowDistanceDetailsClass0Command => _showDistanceDetailsClass0Command!;
+        public IRelayCommand ShowDistanceDetailsClass1Command => _showDistanceDetailsClass1Command!;
+        public IRelayCommand ShowToleranceDetailsClass0Command => _showToleranceDetailsClass0Command!;
+        public IRelayCommand ShowToleranceDetailsClass1Command => _showToleranceDetailsClass1Command!;
         
         #endregion
 
@@ -122,6 +138,10 @@ namespace baseis.ViewModels
         public string BinaryHeaderClass1 => $"Бинарная матрица (K=1, delta = {delta})";
         public string ReferenceHeaderClass0 => $"Эталонный вектор (K=0, p = {selec})";
         public string ReferenceHeaderClass1 => $"Эталонный вектор (K=1, p = {selec})";
+        public string DistanceHeaderClass0 => "Матрица расстояний (K=0)";
+        public string DistanceHeaderClass1 => "Матрица расстояний (K=1)";
+        public string ToleranceHeaderClass0 => "Матрица допусков (K=0)";
+        public string ToleranceHeaderClass1 => "Матрица допусков (K=1)";
         #endregion
 
         #region Публичные методы доступа к данным
@@ -136,6 +156,7 @@ namespace baseis.ViewModels
         public double GetSelec() => selec;
         public int GetN() => N; 
         public int Getn() => n;  
+        public int[,,] GetSkMatrix() => _skMatrix;
         #endregion
 
         #region Публичные методы установки данных
@@ -149,6 +170,7 @@ namespace baseis.ViewModels
         public void SetBinaryMatrixVisualization2(Bitmap? value) => BinaryMatrixVisualization2 = value;
         public void SetReferenceVectorsVisualization1(Bitmap? value) => ReferenceVectorsVisualization1 = value;
         public void SetReferenceVectorsVisualization2(Bitmap? value) => ReferenceVectorsVisualization2 = value;
+        public void SetSkMatrix(int[,,] value) => _skMatrix = value;
         #endregion
 
         #region Обработчики изменений свойств
@@ -164,6 +186,10 @@ namespace baseis.ViewModels
             _showBinaryDetailsClass1Command?.NotifyCanExecuteChanged();
             _showReferenceDetailsClass0Command?.NotifyCanExecuteChanged();
             _showReferenceDetailsClass1Command?.NotifyCanExecuteChanged();
+            _showDistanceDetailsClass0Command?.NotifyCanExecuteChanged();
+            _showDistanceDetailsClass1Command?.NotifyCanExecuteChanged();
+            _showToleranceDetailsClass0Command?.NotifyCanExecuteChanged();
+            _showToleranceDetailsClass1Command?.NotifyCanExecuteChanged();
         }
         
         #endregion
@@ -184,6 +210,10 @@ namespace baseis.ViewModels
             _showBinaryDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Бинарная матрица X"), () => CanShowDetails);
             _showReferenceDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Эталонный вектор"), () => CanShowDetails);
             _showReferenceDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Эталонный вектор"), () => CanShowDetails);
+            _showDistanceDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Матрица расстояний"), () => CanShowDetails);
+            _showDistanceDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Матрица расстояний"), () => CanShowDetails);
+            _showToleranceDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Матрица допусков"), () => CanShowDetails);
+            _showToleranceDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Матрица допусков"), () => CanShowDetails);
             
         }
 
@@ -200,15 +230,21 @@ namespace baseis.ViewModels
             switch (matrixType)
             {
                 case "Обучающая матрица Y":
-                    sb.AppendLine(MatrixFormatter.GetLearningMatrixString(GetYMatrix(), classIndex, 100));
+                    sb.AppendLine(MatrixFormatter.GetLearningMatrixString(GetYMatrix(), classIndex));
                     break;
                 case "Бинарная матрица X":
-                    sb.AppendLine(MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), classIndex, 100));
+                    sb.AppendLine(MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), classIndex));
                     sb.AppendLine($"delta = {GetDelta()}");
                     break;
                 case "Эталонный вектор":
-                    sb.AppendLine(MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), classIndex, 100));
+                    sb.AppendLine(MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), classIndex));
                     sb.AppendLine($"p = {GetSelec()}");
+                    break;
+                case "Матрица расстояний":
+                    sb.AppendLine(MatrixFormatter.GetDistanceMatrixString(GetSkMatrix(), classIndex));
+                    break;
+                case "Матрица допусков":
+                    sb.AppendLine(MatrixFormatter.GetToleranceMatrixString(GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), classIndex));
                     break;
             }
 
@@ -239,11 +275,16 @@ namespace baseis.ViewModels
             BinaryMatrixClass1 = "";
             ReferenceVectorClass0 = "";
             ReferenceVectorClass1 = "";
+            DistanceMatrixClass0 = "";
+            DistanceMatrixClass1 = "";
+            ToleranceMatrixClass0 = "";
+            ToleranceMatrixClass1 = "";
 
             // Сброс матриц
             _ndkMatrix = new double[m, N];
             _vdkMatrix = new double[m, N];
             _avgMatrix = new double[m, N];
+            _skMatrix = new int[m, m, n];
 
             // Сброс состояния кнопок
             CanLoadFirst = true;
@@ -264,12 +305,17 @@ namespace baseis.ViewModels
             BinaryMatrixClass1 = "";
             ReferenceVectorClass0 = "";
             ReferenceVectorClass1 = "";
+            DistanceMatrixClass0 = "";
+            DistanceMatrixClass1 = "";
+            ToleranceMatrixClass0 = "";
+            ToleranceMatrixClass1 = "";
             BinaryMatrixVisualization1 = null;
             BinaryMatrixVisualization2 = null;
             ReferenceVectorsVisualization1 = null;
             ReferenceVectorsVisualization2 = null;
             CanShowDetails = false;
             ReferenceVectors = "";
+            _skMatrix = new int[m, m, n];
         }
 
         /// <summary>
@@ -311,6 +357,9 @@ namespace baseis.ViewModels
                 // ПЗ3: Формирование эталонного вектора EV
                 _referenceVectorCalculator.Compute();
 
+                // ПЗ4: Формирование массива кодовых расстояний и распределения реализаций
+                _codeDistanceAnalyzer.Compute();
+
                 // Обновление отображения матриц
                 UpdateMatrixDisplay();
 
@@ -334,13 +383,17 @@ namespace baseis.ViewModels
         /// </summary>
         private void UpdateMatrixDisplay()
         {
-            LearningMatrixClass0 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 0, 20);
-            LearningMatrixClass1 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 1, 20);
-            BinaryMatrixClass0 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 0, 20) + $"\ndelta = {GetDelta()}";
-            BinaryMatrixClass1 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1, 20) + $"\ndelta = {GetDelta()}";
-            ReferenceVectorClass0 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 0, 100) + $"\np = {GetSelec()}";
-            ReferenceVectorClass1 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 1, 100) + $"\np = {GetSelec()}";
+            LearningMatrixClass0 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 0);
+            LearningMatrixClass1 = MatrixFormatter.GetLearningMatrixString(GetYMatrix(), 1);
+            BinaryMatrixClass0 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 0) + $"\ndelta = {GetDelta()}";
+            BinaryMatrixClass1 = MatrixFormatter.GetBinaryMatrixString(GetXMatrix(), GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1) + $"\ndelta = {GetDelta()}";
+            ReferenceVectorClass0 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 0) + $"\np = {GetSelec()}";
+            ReferenceVectorClass1 = MatrixFormatter.GetReferenceVectorString(GetXmMatrix(), 1) + $"\np = {GetSelec()}";
             ReferenceVectors = MatrixFormatter.GetReferenceVectorString(GetXmMatrix());
+            DistanceMatrixClass0 = MatrixFormatter.GetDistanceMatrixString(GetSkMatrix(), 0);
+            DistanceMatrixClass1 = MatrixFormatter.GetDistanceMatrixString(GetSkMatrix(), 1);
+            ToleranceMatrixClass0 = MatrixFormatter.GetToleranceMatrixString(GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 0);
+            ToleranceMatrixClass1 = MatrixFormatter.GetToleranceMatrixString(GetNdkMatrix(), GetVdkMatrix(), GetAvgMatrix(), 1);
         }
 
         

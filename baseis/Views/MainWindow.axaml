@@ -23,136 +23,187 @@
             <Button Content="Загрузить второе" Command="{Binding LoadSecondCommand}" Padding="10,5" IsEnabled="{Binding CanLoadSecond}"/>
             <Button Content="Рассчитать" Command="{Binding CalculateCommand}" Padding="10,5" IsEnabled="{Binding CanCalculate}"/>
             <Button Content="Очистить всё" Command="{Binding ClearCommand}" Padding="10,5" IsEnabled="{Binding CanClear}" Background="#FFEF5350" Foreground="White"/>
-            <!-- Регулятор масштаба отображения -->
             <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center" Spacing="6">
                 <TextBlock Text="Масштаб" VerticalAlignment="Center"/>
                 <Slider Minimum="6" Maximum="20" Value="{Binding MatrixFontSize}" Width="180"/>
             </StackPanel>
         </StackPanel>
 
-        <!-- Основная область прокрутки -->
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <Grid ColumnDefinitions="*,*" Margin="10" ColumnSpacing="10">
-                <!-- Класс 0 -->
-                <StackPanel Grid.Column="0" Spacing="10">
-                    <TextBlock Text="Класс 0" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"/>
+        <!-- Основная область -->
+        <TabControl Margin="10"
+                    TabStripPlacement="Bottom"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+            <TabItem Header="Класс 0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Orientation="Vertical" Spacing="16">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnSpacing="16"
+                              HorizontalAlignment="Left">
+                            <!-- Обучающая матрица -->
+                            <StackPanel Grid.Column="0" Width="420" Spacing="8">
+                                <TextBlock Text="Загруженное изображение" HorizontalAlignment="Center"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Height="380" Width="380" HorizontalAlignment="Center">
+                                    <Image Source="{Binding SourceImage1}" Stretch="Uniform" Margin="6"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding TrainingHeaderClass0}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                    <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass0Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                                </StackPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="420">
+                                        <TextBox Text="{Binding LearningMatrixClass0}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
 
-                    <!-- Исходное изображение, бинарное изображение и эталонный вектор класса 0 -->
-                    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="4">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Загруженное изображение" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Бинарное изображение" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Изображение вектора" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ReferenceHeaderClass0}" HorizontalAlignment="Center"/>
+                            <!-- Бинарная матрица -->
+                            <StackPanel Grid.Column="1" Width="600" Spacing="8">
+                                <TextBlock Text="Бинарное изображение" HorizontalAlignment="Center"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Height="380" Width="380" HorizontalAlignment="Center">
+                                    <Image Source="{Binding BinaryMatrixVisualization1}" Stretch="Uniform" Margin="6"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding BinaryHeaderClass0}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                    <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass0Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                                </StackPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="600">
+                                        <TextBox Text="{Binding BinaryMatrixClass0}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
 
-                        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
-                            <Image Source="{Binding SourceImage1}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="1" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
-                            <Image Source="{Binding BinaryMatrixVisualization1}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="2" BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Width="80" Height="240">
-                            <Image Source="{Binding ReferenceVectorsVisualization1}" Stretch="Fill" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="3" BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Width="90" Height="240">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding ReferenceVectorClass0}" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" TextWrapping="NoWrap"/>
-                            </ScrollViewer>
-                        </Border>
+                            <!-- Матрица допусков -->
+                            <StackPanel Grid.Column="2" Width="240" Spacing="8">
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Подробнее" Command="{Binding ShowToleranceDetailsClass0Command}" Padding="5,2" DockPanel.Dock="Right"/>
+                                    <TextBlock Text="{Binding ToleranceHeaderClass0}" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Left"/>
+                                </DockPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="240">
+                                        <TextBox Text="{Binding ToleranceMatrixClass0}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
 
-                        <Button Grid.Row="2" Grid.Column="3" Content="Подробнее" Command="{Binding ShowReferenceDetailsClass0Command}" Padding="5,2"
-                                HorizontalAlignment="Center"/>
-                    </Grid>
+                            <!-- Эталонный вектор -->
+                            <StackPanel Grid.Column="3" Width="240" Spacing="8">
+                                <TextBlock Text="Эталонный вектор (K=0)" HorizontalAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Height="380" Width="140" HorizontalAlignment="Center">
+                                    <Image Source="{Binding ReferenceVectorsVisualization1}" Stretch="Fill" Margin="0"/>
+                                </Border>
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Подробнее" Command="{Binding ShowReferenceDetailsClass0Command}" Padding="5,2" DockPanel.Dock="Right"/>
+                                    <TextBlock Text="{Binding ReferenceHeaderClass0}" FontWeight="Bold" TextWrapping="Wrap" MaxWidth="160" HorizontalAlignment="Left"/>
+                                </DockPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="240">
+                                        <TextBox Text="{Binding ReferenceVectorClass0}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
 
-                    <!-- Обучающаяся матрица класса 0 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding TrainingHeaderClass0}" FontWeight="Bold" Margin="0,0,10,0"/>
-                        <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass0Command}" Padding="5,2"
-                                HorizontalAlignment="Right"/>
+                        <!-- Матрица расстояний -->
+                        <StackPanel Spacing="8" Width="1100">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                <TextBlock Text="{Binding DistanceHeaderClass0}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                <Button Content="Подробнее" Command="{Binding ShowDistanceDetailsClass0Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="1100">
+                                    <TextBox Text="{Binding DistanceMatrixClass0}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
-                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="260">
-                            <TextBox Text="{Binding LearningMatrixClass0}" IsReadOnly="True" FontFamily="Consolas"
-                                     FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent"
-                                     AcceptsReturn="True" TextWrapping="NoWrap"/>
-                        </ScrollViewer>
-                    </Border>
+                </ScrollViewer>
+            </TabItem>
 
-                    <!-- Бинарная матрица класса 0 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding BinaryHeaderClass0}" FontWeight="Bold" Margin="0,0,10,0"/>
-                        <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass0Command}" Padding="5,2"
-                                HorizontalAlignment="Right"/>
+            <TabItem Header="Класс 1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Orientation="Vertical" Spacing="16">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnSpacing="16"
+                              HorizontalAlignment="Left">
+                            <StackPanel Grid.Column="0" Width="420" Spacing="8">
+                                <TextBlock Text="Загруженное изображение" HorizontalAlignment="Center"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Height="380" Width="380" HorizontalAlignment="Center">
+                                    <Image Source="{Binding SourceImage2}" Stretch="Uniform" Margin="6"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding TrainingHeaderClass1}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                    <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass1Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                                </StackPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="420">
+                                        <TextBox Text="{Binding LearningMatrixClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Width="600" Spacing="8">
+                                <TextBlock Text="Бинарное изображение" HorizontalAlignment="Center"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Height="380" Width="380" HorizontalAlignment="Center">
+                                    <Image Source="{Binding BinaryMatrixVisualization2}" Stretch="Uniform" Margin="6"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding BinaryHeaderClass1}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                    <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass1Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                                </StackPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="600">
+                                        <TextBox Text="{Binding BinaryMatrixClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Width="240" Spacing="8">
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Подробнее" Command="{Binding ShowToleranceDetailsClass1Command}" Padding="5,2" DockPanel.Dock="Right"/>
+                                    <TextBlock Text="{Binding ToleranceHeaderClass1}" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Left"/>
+                                </DockPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="240">
+                                        <TextBox Text="{Binding ToleranceMatrixClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="3" Width="240" Spacing="8">
+                                <TextBlock Text="Эталонный вектор (K=1)" HorizontalAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Height="380" Width="140" HorizontalAlignment="Center">
+                                    <Image Source="{Binding ReferenceVectorsVisualization2}" Stretch="Fill" Margin="0"/>
+                                </Border>
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Подробнее" Command="{Binding ShowReferenceDetailsClass1Command}" Padding="5,2" DockPanel.Dock="Right"/>
+                                    <TextBlock Text="{Binding ReferenceHeaderClass1}" FontWeight="Bold" TextWrapping="Wrap" MaxWidth="160" HorizontalAlignment="Left"/>
+                                </DockPanel>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="240">
+                                        <TextBox Text="{Binding ReferenceVectorClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="8" Width="1100">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                <TextBlock Text="{Binding DistanceHeaderClass1}" FontWeight="Bold" Margin="0,0,8,0"/>
+                                <Button Content="Подробнее" Command="{Binding ShowDistanceDetailsClass1Command}" Padding="5,2" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="320" Width="1100">
+                                    <TextBox Text="{Binding DistanceMatrixClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
-                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="260">
-                            <TextBox Text="{Binding BinaryMatrixClass0}" IsReadOnly="True" FontFamily="Consolas"
-                                     FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent"
-                                     AcceptsReturn="True" TextWrapping="NoWrap"/>
-                        </ScrollViewer>
-                    </Border>
-                </StackPanel>
-
-                <!-- Класс 1 -->
-                <StackPanel Grid.Column="1" Spacing="10">
-                    <TextBlock Text="Класс 1" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"/>
-
-                    <!-- Исходное изображение, бинарное изображение и эталонный вектор класса 1 -->
-                    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="4">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Загруженное изображение" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Бинарное изображение" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Изображение вектора" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ReferenceHeaderClass1}" HorizontalAlignment="Center"/>
-
-                        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
-                            <Image Source="{Binding SourceImage2}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="1" BorderBrush="#CCCCCC" BorderThickness="1" Background="#F5F5F5" Width="240" Height="240">
-                            <Image Source="{Binding BinaryMatrixVisualization2}" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="2" BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Width="80" Height="240">
-                            <Image Source="{Binding ReferenceVectorsVisualization2}" Stretch="Fill" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="3" BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF" Width="90" Height="240">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding ReferenceVectorClass1}" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" TextWrapping="NoWrap"/>
-                            </ScrollViewer>
-                        </Border>
-
-                        <Button Grid.Row="2" Grid.Column="3" Content="Подробнее" Command="{Binding ShowReferenceDetailsClass1Command}" Padding="5,2"
-                                HorizontalAlignment="Center"/>
-                    </Grid>
-
-                    <!-- Обучающаяся матрица класса 1 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding TrainingHeaderClass1}" FontWeight="Bold" Margin="0,0,10,0"/>
-                        <Button Content="Подробнее" Command="{Binding ShowTrainingDetailsClass1Command}" Padding="5,2"
-                                HorizontalAlignment="Right"/>
-                    </StackPanel>
-                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="260">
-                            <TextBox Text="{Binding LearningMatrixClass1}" IsReadOnly="True" FontFamily="Consolas"
-                                     FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent"
-                                     AcceptsReturn="True" TextWrapping="NoWrap"/>
-                        </ScrollViewer>
-                    </Border>
-
-                    <!-- Бинарная матрица класса 1 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding BinaryHeaderClass1}" FontWeight="Bold" Margin="0,0,10,0"/>
-                        <Button Content="Подробнее" Command="{Binding ShowBinaryDetailsClass1Command}" Padding="5,2"
-                                HorizontalAlignment="Right"/>
-                    </StackPanel>
-                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Background="#FFFFFF">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Height="260">
-                            <TextBox Text="{Binding BinaryMatrixClass1}" IsReadOnly="True" FontFamily="Consolas"
-                                     FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent"
-                                     AcceptsReturn="True" TextWrapping="NoWrap"/>
-                        </ScrollViewer>
-                    </Border>
-                </StackPanel>
-            </Grid>
-        </ScrollViewer>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>
