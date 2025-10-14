@@ -207,8 +207,6 @@ namespace baseis.ViewModels
 
         private static void AppendCodeDistanceRow(StringBuilder sb, int[,,] matrix, int classIndex, int rowIndex, int totalCount)
         {
-            const int valuesPerLine = 20;
-
             for (int realization = 0; realization < totalCount; realization++)
             {
                 sb.Append(matrix[classIndex, rowIndex, realization]);
@@ -217,17 +215,9 @@ namespace baseis.ViewModels
                 {
                     sb.Append(' ');
                 }
-
-                if ((realization + 1) % valuesPerLine == 0)
-                {
-                    sb.AppendLine();
-                }
             }
 
-            if (totalCount % valuesPerLine != 0)
-            {
-                sb.AppendLine();
-            }
+            sb.AppendLine();
         }
     }
 }
