@@ -82,8 +82,8 @@ namespace baseis.ViewModels
             for (int y = 0; y < height; y++)
             {
                 var referenceColor = xm[classIndex, y] == 1
-                    ? new Rgba32(0, 0, 0)
-                    : new Rgba32(255, 255, 255);
+                    ? new Rgba32(255, 255, 255)
+                    : new Rgba32(0, 0, 0);
                 
                 image[0, y] = referenceColor;
             }

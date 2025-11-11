@@ -100,8 +100,8 @@ namespace baseis.ViewModels
                 for (int x = 0; x < width; x++)
                 {
                     var binaryColor = X[classIndex, y, x] == 1 
-                        ? new Rgba32(0, 0, 0)
-                        : new Rgba32(255, 255, 255);
+                        ? new Rgba32(255, 255, 255)
+                        : new Rgba32(0, 0, 0);
                     
                     image[x, y] = binaryColor;
                 }

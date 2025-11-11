@@ -26,23 +26,24 @@ namespace baseis.ViewModels
             int featureCount = X.GetLength(1);
             int realizationCount = X.GetLength(2);
 
-            var skMatrix = new int[classCount, classCount, featureCount];
+            var skMatrix = new int[classCount, classCount, realizationCount];
 
             for (int classIndex = 0; classIndex < classCount; classIndex++)
             {
                 for (int classNeighbors = 0; classNeighbors < classCount; classNeighbors++)
                 {
-                    for (int feature = 0; feature < featureCount; feature++)
+                    for (int realization = 0; realization < realizationCount; realization++)
                     {
-                        var different = 0;
-                        for (int realization = 0; realization < realizationCount; realization++)
+                        int different = 0;
+                        for (int feature = 0; feature < featureCount; feature++)
                         {
-                            if (xm[classIndex, realization] != X[classNeighbors, feature, realization])
+                            if (xm[classIndex, feature] != X[classNeighbors, feature, realization])
                             {
-                                different += 1;
+                                different++;
                             }
                         }
-                        skMatrix[classIndex, classNeighbors, feature] = different;
+
+                        skMatrix[classIndex, classNeighbors, realization] = different;
                     }
                 }
             }

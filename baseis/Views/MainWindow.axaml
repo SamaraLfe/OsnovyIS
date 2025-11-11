@@ -17,12 +17,21 @@
     </Design.DataContext>
 
     <DockPanel>
+
         <!-- Панель управления -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Spacing="10">
             <Button Content="Загрузить первое" Command="{Binding LoadFirstCommand}" Padding="10,5" IsEnabled="{Binding CanLoadFirst}"/>
             <Button Content="Загрузить второе" Command="{Binding LoadSecondCommand}" Padding="10,5" IsEnabled="{Binding CanLoadSecond}"/>
             <Button Content="Рассчитать" Command="{Binding CalculateCommand}" Padding="10,5" IsEnabled="{Binding CanCalculate}"/>
+            <Button Content="Оптимизация параметров" Command="{Binding OptimizeParametersCommand}" Padding="10,5" IsEnabled="{Binding CanCalculate}"/>
+            <Button Content="Вывести таблицу" Command="{Binding ExportPz5ReportCommand}" Padding="10,5" IsEnabled="{Binding CanExportPz5}"/>
             <Button Content="Очистить всё" Command="{Binding ClearCommand}" Padding="10,5" IsEnabled="{Binding CanClear}" Background="#FFEF5350" Foreground="White"/>
+            <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center" Spacing="6">
+                <TextBlock Text="delta" VerticalAlignment="Center"/>
+                <NumericUpDown Minimum="0" Maximum="255" Value="{Binding Delta}" Width="80"/>
+                <TextBlock Text="p" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                <NumericUpDown Minimum="0" Maximum="1" Increment="0.01" Value="{Binding Selec}" Width="80" FormatString="F2"/>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center" Spacing="6">
                 <TextBlock Text="Масштаб" VerticalAlignment="Center"/>
                 <Slider Minimum="6" Maximum="20" Value="{Binding MatrixFontSize}" Width="180"/>
@@ -118,6 +127,40 @@
                                 </ScrollViewer>
                             </Border>
                         </StackPanel>
+
+                        <StackPanel Spacing="8" Width="1100">
+                            <TextBlock Text="{Binding Pz5MaxRadiusText}" FontWeight="Bold"/>
+                            <StackPanel Orientation="Vertical" Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="32">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Критерий Шеннона" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5ShannonRadiusClass0}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5ShannonValueClass0}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Точностные характеристики (Шеннон)" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5ShannonD1Class0}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5ShannonAlphaClass0}"/>
+                                        <TextBlock Text="{Binding Pz5ShannonBetaClass0}"/>
+                                        <TextBlock Text="{Binding Pz5ShannonD2Class0}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="32">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Критерий Кульбака" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5KullbackRadiusClass0}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5KullbackValueClass0}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Точностные характеристики (Кульбак)" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5KullbackD1Class0}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5KullbackAlphaClass0}"/>
+                                        <TextBlock Text="{Binding Pz5KullbackBetaClass0}"/>
+                                        <TextBlock Text="{Binding Pz5KullbackD2Class0}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -200,6 +243,40 @@
                                     <TextBox Text="{Binding DistanceMatrixClass1}" IsReadOnly="True" FontFamily="Consolas" FontSize="{Binding MatrixFontSize}" BorderThickness="0" Background="Transparent" AcceptsReturn="True" TextWrapping="NoWrap"/>
                                 </ScrollViewer>
                             </Border>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8" Width="1100">
+                            <TextBlock Text="{Binding Pz5MaxRadiusText}" FontWeight="Bold"/>
+                            <StackPanel Orientation="Vertical" Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="32">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Критерий Шеннона" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5ShannonRadiusClass1}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5ShannonValueClass1}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Точностные характеристики (Шеннон)" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5ShannonD1Class1}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5ShannonAlphaClass1}"/>
+                                        <TextBlock Text="{Binding Pz5ShannonBetaClass1}"/>
+                                        <TextBlock Text="{Binding Pz5ShannonD2Class1}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="32">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Критерий Кульбака" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5KullbackRadiusClass1}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5KullbackValueClass1}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Точностные характеристики (Кульбак)" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Pz5KullbackD1Class1}" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Pz5KullbackAlphaClass1}"/>
+                                        <TextBlock Text="{Binding Pz5KullbackBetaClass1}"/>
+                                        <TextBlock Text="{Binding Pz5KullbackD2Class1}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

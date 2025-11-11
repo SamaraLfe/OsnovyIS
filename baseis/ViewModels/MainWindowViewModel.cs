@@ -1,8 +1,10 @@
 ﻿using Avalonia.Media.Imaging;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.Generic;
-using System;
 
 namespace baseis.ViewModels
 {
@@ -20,8 +22,8 @@ namespace baseis.ViewModels
         private const int m = 2;        // Количество классов
         private const int N = 100;      // количество признаков распознавания (строки)
         private const int n = 100;      //  количество реализаций (столбцы)
-        private const int delta = 50;   // контрольный допуск
-        private const double selec = 0.63; // уровень селекции
+        [ObservableProperty] private int delta = 42;   // контрольный допуск
+        [ObservableProperty] private double selec = 0.55; // уровень селекции
         #endregion
 
 
@@ -37,6 +39,31 @@ namespace baseis.ViewModels
         [ObservableProperty] private string distanceMatrixClass1 = "";
         [ObservableProperty] private string toleranceMatrixClass0 = "";
         [ObservableProperty] private string toleranceMatrixClass1 = "";
+        [ObservableProperty] private string pz5ShannonRadiusClass0 = "";
+        [ObservableProperty] private string pz5ShannonD1Class0 = "";
+        [ObservableProperty] private string pz5ShannonAlphaClass0 = "";
+        [ObservableProperty] private string pz5ShannonBetaClass0 = "";
+        [ObservableProperty] private string pz5ShannonD2Class0 = "";
+        [ObservableProperty] private string pz5ShannonValueClass0 = "";
+        [ObservableProperty] private string pz5ShannonRadiusClass1 = "";
+        [ObservableProperty] private string pz5ShannonD1Class1 = "";
+        [ObservableProperty] private string pz5ShannonAlphaClass1 = "";
+        [ObservableProperty] private string pz5ShannonBetaClass1 = "";
+        [ObservableProperty] private string pz5ShannonD2Class1 = "";
+        [ObservableProperty] private string pz5ShannonValueClass1 = "";
+        [ObservableProperty] private string pz5MaxRadiusText = "";
+        [ObservableProperty] private string pz5KullbackRadiusClass0 = "";
+        [ObservableProperty] private string pz5KullbackValueClass0 = "";
+        [ObservableProperty] private string pz5KullbackD1Class0 = "";
+        [ObservableProperty] private string pz5KullbackAlphaClass0 = "";
+        [ObservableProperty] private string pz5KullbackBetaClass0 = "";
+        [ObservableProperty] private string pz5KullbackD2Class0 = "";
+        [ObservableProperty] private string pz5KullbackRadiusClass1 = "";
+        [ObservableProperty] private string pz5KullbackValueClass1 = "";
+        [ObservableProperty] private string pz5KullbackD1Class1 = "";
+        [ObservableProperty] private string pz5KullbackAlphaClass1 = "";
+        [ObservableProperty] private string pz5KullbackBetaClass1 = "";
+        [ObservableProperty] private string pz5KullbackD2Class1 = "";
         #endregion
 
         #region Свойства интерфейса - Изображения
@@ -54,6 +81,7 @@ namespace baseis.ViewModels
         [ObservableProperty] private bool canCalculate = false;
         [ObservableProperty] private bool canShowDetails = false;
         [ObservableProperty] private bool canClear = false;
+        [ObservableProperty] private bool canExportPz5 = false;
         [ObservableProperty] private double matrixFontSize = 10;
         #endregion
 
@@ -66,6 +94,7 @@ namespace baseis.ViewModels
         private double[,] _avgMatrix = new double[m, N];      // Средние значения AVG[2,100]
         private int[,,] _skMatrix = new int[m, m, n];         // Матрицы расстояний SK[2,2,100]
         private List<Bitmap> _trainingImages = new List<Bitmap>();
+        private readonly Dictionary<int, List<Pz5RadiusMetrics>> _pz5Metrics = new();
         #endregion
 
         #region Сервисы
@@ -74,6 +103,12 @@ namespace baseis.ViewModels
         private readonly Pz2BinaryMatrixProcessor _binaryMatrixProcessor;
         private readonly Pz3ReferenceVectorCalculator _referenceVectorCalculator;
         private readonly Pz4CodeDistanceAnalyzer _codeDistanceAnalyzer;
+        private readonly Pz5AccuracyMetricsCalculator _pz5AccuracyMetricsCalculator;
+        private readonly Pz5ShannonEfficiencyCalculator _pz5ShannonEfficiencyCalculator;
+        private readonly Pz5KullbackEfficiencyCalculator _pz5KullbackEfficiencyCalculator;
+        private readonly Pz5ExcelReportGenerator _pz5ExcelReportGenerator;
+        private readonly Pz6ParameterOptimizer _pz6ParameterOptimizer;
+        private readonly Pz6ExcelReportGenerator _pz6ExcelReportGenerator;
         private readonly MatrixFormatter _matrixFormatter;
         #endregion
 
@@ -82,6 +117,8 @@ namespace baseis.ViewModels
         private RelayCommand? _loadFirstCommand;
         private RelayCommand? _loadSecondCommand;
         private RelayCommand? _clearCommand;
+        private RelayCommand? _exportPz5ReportCommand;
+        private RelayCommand? _optimizeParametersCommand;
         
         private RelayCommand? _showTrainingDetailsClass0Command;
         private RelayCommand? _showTrainingDetailsClass1Command;
@@ -105,6 +142,12 @@ namespace baseis.ViewModels
             _binaryMatrixProcessor = new Pz2BinaryMatrixProcessor(this);
             _referenceVectorCalculator = new Pz3ReferenceVectorCalculator(this);
             _codeDistanceAnalyzer = new Pz4CodeDistanceAnalyzer(this);
+            _pz5AccuracyMetricsCalculator = new Pz5AccuracyMetricsCalculator(this);
+            _pz5ShannonEfficiencyCalculator = new Pz5ShannonEfficiencyCalculator();
+            _pz5KullbackEfficiencyCalculator = new Pz5KullbackEfficiencyCalculator();
+            _pz5ExcelReportGenerator = new Pz5ExcelReportGenerator();
+            _pz6ParameterOptimizer = new Pz6ParameterOptimizer(this);
+            _pz6ExcelReportGenerator = new Pz6ExcelReportGenerator();
             _matrixFormatter = new MatrixFormatter();
 
             // Инициализация команд
@@ -117,6 +160,8 @@ namespace baseis.ViewModels
         public IRelayCommand LoadSecondCommand => _loadSecondCommand!;
         public IRelayCommand CalculateCommand => _calculateCommand!;
         public IRelayCommand ClearCommand => _clearCommand!;
+        public IRelayCommand ExportPz5ReportCommand => _exportPz5ReportCommand!;
+        public IRelayCommand OptimizeParametersCommand => _optimizeParametersCommand!;
         
         public IRelayCommand ShowTrainingDetailsClass0Command => _showTrainingDetailsClass0Command!;
         public IRelayCommand ShowTrainingDetailsClass1Command => _showTrainingDetailsClass1Command!;
@@ -134,10 +179,10 @@ namespace baseis.ViewModels
         #region Публичные свойства UI заголовков
         public string TrainingHeaderClass0 => "Обучающаяся матрица (K=0)";
         public string TrainingHeaderClass1 => "Обучающаяся матрица (K=1)";
-        public string BinaryHeaderClass0 => $"Бинарная матрица (K=0, delta = {delta})";
-        public string BinaryHeaderClass1 => $"Бинарная матрица (K=1, delta = {delta})";
-        public string ReferenceHeaderClass0 => $"Эталонный вектор (K=0, p = {selec})";
-        public string ReferenceHeaderClass1 => $"Эталонный вектор (K=1, p = {selec})";
+        public string BinaryHeaderClass0 => $"Бинарная матрица (K=0, delta = {Delta})";
+        public string BinaryHeaderClass1 => $"Бинарная матрица (K=1, delta = {Delta})";
+        public string ReferenceHeaderClass0 => $"Эталонный вектор (K=0, p = {Selec})";
+        public string ReferenceHeaderClass1 => $"Эталонный вектор (K=1, p = {Selec})";
         public string DistanceHeaderClass0 => "Матрица расстояний (K=0)";
         public string DistanceHeaderClass1 => "Матрица расстояний (K=1)";
         public string ToleranceHeaderClass0 => "Матрица допусков (K=0)";
@@ -152,8 +197,8 @@ namespace baseis.ViewModels
         public double[,] GetVdkMatrix() => _vdkMatrix;
         public double[,] GetAvgMatrix() => _avgMatrix;
         public List<Bitmap> GetTrainingImages() => _trainingImages;
-        public int GetDelta() => delta;
-        public double GetSelec() => selec;
+        public int GetDelta() => Delta;
+        public double GetSelec() => Selec;
         public int GetN() => N; 
         public int Getn() => n;  
         public int[,,] GetSkMatrix() => _skMatrix;
@@ -176,8 +221,13 @@ namespace baseis.ViewModels
         #region Обработчики изменений свойств
         partial void OnCanLoadFirstChanged(bool value) => _loadFirstCommand?.NotifyCanExecuteChanged();
         partial void OnCanLoadSecondChanged(bool value) => _loadSecondCommand?.NotifyCanExecuteChanged();
-        partial void OnCanCalculateChanged(bool value) => _calculateCommand?.NotifyCanExecuteChanged();
+        partial void OnCanCalculateChanged(bool value)
+        {
+            _calculateCommand?.NotifyCanExecuteChanged();
+            _optimizeParametersCommand?.NotifyCanExecuteChanged();
+        }
         partial void OnCanClearChanged(bool value) => _clearCommand?.NotifyCanExecuteChanged();
+        partial void OnCanExportPz5Changed(bool value) => _exportPz5ReportCommand?.NotifyCanExecuteChanged();
         partial void OnCanShowDetailsChanged(bool value)
         {
             _showTrainingDetailsClass0Command?.NotifyCanExecuteChanged();
@@ -190,6 +240,18 @@ namespace baseis.ViewModels
             _showDistanceDetailsClass1Command?.NotifyCanExecuteChanged();
             _showToleranceDetailsClass0Command?.NotifyCanExecuteChanged();
             _showToleranceDetailsClass1Command?.NotifyCanExecuteChanged();
+        }
+
+        partial void OnDeltaChanged(int value)
+        {
+            OnPropertyChanged(nameof(BinaryHeaderClass0));
+            OnPropertyChanged(nameof(BinaryHeaderClass1));
+        }
+
+        partial void OnSelecChanged(double value)
+        {
+            OnPropertyChanged(nameof(ReferenceHeaderClass0));
+            OnPropertyChanged(nameof(ReferenceHeaderClass1));
         }
         
         #endregion
@@ -204,6 +266,8 @@ namespace baseis.ViewModels
             _loadSecondCommand = new RelayCommand(LoadSecondImage, () => CanLoadSecond);
             _calculateCommand = new RelayCommand(Calculate, () => CanCalculate);
             _clearCommand = new RelayCommand(ClearAll, () => CanClear);
+            _exportPz5ReportCommand = new RelayCommand(ExportPz5Report, () => CanExportPz5);
+            _optimizeParametersCommand = new RelayCommand(OptimizeParameters, () => CanCalculate);
             _showTrainingDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Обучающая матрица Y"), () => CanShowDetails);
             _showTrainingDetailsClass1Command = new RelayCommand(() => ShowDetails(1, "Обучающая матрица Y"), () => CanShowDetails);
             _showBinaryDetailsClass0Command = new RelayCommand(() => ShowDetails(0, "Бинарная матрица X"), () => CanShowDetails);
@@ -279,6 +343,7 @@ namespace baseis.ViewModels
             DistanceMatrixClass1 = "";
             ToleranceMatrixClass0 = "";
             ToleranceMatrixClass1 = "";
+            ClearPz5Properties();
 
             // Сброс матриц
             _ndkMatrix = new double[m, N];
@@ -292,6 +357,8 @@ namespace baseis.ViewModels
             CanCalculate = false;
             CanShowDetails = false;
             CanClear = false;
+            CanExportPz5 = false;
+            _pz5Metrics.Clear();
         }
 
         /// <summary>
@@ -316,6 +383,9 @@ namespace baseis.ViewModels
             CanShowDetails = false;
             ReferenceVectors = "";
             _skMatrix = new int[m, m, n];
+            CanExportPz5 = false;
+            _pz5Metrics.Clear();
+            ClearPz5Properties();
         }
 
         /// <summary>
@@ -339,11 +409,13 @@ namespace baseis.ViewModels
         /// <summary>
         /// Выполняет полный цикл вычислений для системы распознавания
         /// </summary>
-        private void Calculate()
+        private void Calculate() => TryRunFullCalculation();
+
+        internal bool TryRunFullCalculation()
         {
             if (GetTrainingImages().Count < 2)
             {
-                return;
+                return false;
             }
 
             try
@@ -367,16 +439,259 @@ namespace baseis.ViewModels
                 _binaryMatrixProcessor.VisualizeBinaryMatrix();
                 _referenceVectorCalculator.VisualizeReferenceVectors();
 
+                // ПЗ5: Расчёт критериев функциональной эффективности
+                ComputePz5Metrics();
+
                 // Обновление состояния интерфейса
                 CanShowDetails = true;
                 CanClear = true;
+
+                return true;
             }
             catch (Exception ex)
             {
                 // Логируем ошибку вычислений
                 System.Diagnostics.Debug.WriteLine($"Ошибка при выполнении вычислений: {ex.Message}");
+                return false;
             }
         }
+
+        /// <summary>
+        /// Формирует таблицу и графики ПЗ5 и открывает Excel-файл с отчётом.
+        /// </summary>
+        private void ExportPz5Report()
+        {
+            if (_pz5Metrics.Count == 0)
+            {
+                ComputePz5Metrics();
+                if (_pz5Metrics.Count == 0)
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                var reportData = _pz5Metrics.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => (IReadOnlyList<Pz5RadiusMetrics>)kvp.Value.ToList());
+
+                var path = _pz5ExcelReportGenerator.GenerateReport(reportData);
+                if (!_pz5ExcelReportGenerator.TryOpenReport(path))
+                {
+                    _matrixFormatter.ShowDetailsWindow(
+                        "Отчёт ПЗ5",
+                        $"Отчёт сохранён по пути:\n{path}\n\nОткройте файл вручную.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка формирования отчёта ПЗ5: {ex.Message}");
+            }
+        }
+
+        private void OptimizeParameters()
+        {
+            var settings = Pz6OptimizationSettings.CreateDefault(Delta, Selec);
+            var result = _pz6ParameterOptimizer.Optimize(settings);
+            if (result == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var path = _pz6ExcelReportGenerator.GenerateReport(result);
+                if (!_pz6ExcelReportGenerator.TryOpenReport(path))
+                {
+                    _matrixFormatter.ShowDetailsWindow(
+                        "Оптимизация ПЗ6",
+                        $"Отчёт сохранён по пути:\n{path}\n\nОткройте файл вручную.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка формирования отчёта ПЗ6: {ex.Message}");
+            }
+        }
+
+        private void ComputePz5Metrics()
+        {
+            var computed = _pz5AccuracyMetricsCalculator.Compute();
+            _pz5Metrics.Clear();
+
+            foreach (var kvp in computed)
+            {
+                var list = new List<Pz5RadiusMetrics>(kvp.Value);
+                _pz5ShannonEfficiencyCalculator.Compute(list);
+                _pz5KullbackEfficiencyCalculator.Compute(list);
+                _pz5Metrics[kvp.Key] = list;
+            }
+
+            var maxRadiusByClass = _pz5AccuracyMetricsCalculator.MaxRadiusByClass;
+            if (maxRadiusByClass.Count > 0)
+            {
+                int maxRadius = maxRadiusByClass.Values.Max();
+                Pz5MaxRadiusText = $"Расстояние между центрами классов = {maxRadius+1}";
+            }
+            else
+            {
+                Pz5MaxRadiusText = "";
+            }
+
+            if (_pz5Metrics.Count == 0 || _pz5Metrics.All(kvp => kvp.Value.Count == 0))
+            {
+                ClearPz5Properties();
+                CanExportPz5 = false;
+                return;
+            }
+
+            for (int classIndex = 0; classIndex < m; classIndex++)
+            {
+                var bestShannon = GetBestMetric(classIndex, metric => metric.ShannonKfe);
+                SetShannonProperties(classIndex, bestShannon);
+
+                var bestKullback = GetBestMetric(classIndex, metric => metric.KullbackKfe);
+                SetKullbackProperties(classIndex, bestKullback);
+            }
+
+            CanExportPz5 = true;
+        }
+
+        internal IReadOnlyDictionary<int, IReadOnlyList<Pz5RadiusMetrics>> GetPz5MetricsSnapshot()
+        {
+            var snapshot = new Dictionary<int, IReadOnlyList<Pz5RadiusMetrics>>(_pz5Metrics.Count);
+            foreach (var kvp in _pz5Metrics)
+            {
+                var copy = kvp.Value.Select(metric => metric.Clone()).ToList();
+                snapshot[kvp.Key] = copy;
+            }
+
+            return snapshot;
+        }
+
+        private Pz5RadiusMetrics? GetBestMetric(int classIndex, Func<Pz5RadiusMetrics, double> selector)
+        {
+            if (!_pz5Metrics.TryGetValue(classIndex, out var list) || list.Count == 0)
+            {
+                return null;
+            }
+
+            Pz5RadiusMetrics? best = null;
+            double bestValue = double.MinValue;
+
+            foreach (var metric in list)
+            {
+                if (!metric.IsReliable)
+                {
+                    continue;
+                }
+
+                double value = selector(metric);
+                if (!double.IsFinite(value))
+                {
+                    continue;
+                }
+
+                if (best == null || value > bestValue)
+                {
+                    best = metric;
+                    bestValue = value;
+                }
+            }
+
+            return best;
+        }
+
+        private void SetShannonProperties(int classIndex, Pz5RadiusMetrics? metric)
+        {
+            string radius = metric != null ? $"r = {metric.Radius}" : "r = -";
+            string d1 = metric != null ? $"D1 = {FormatValue(metric.D1)}" : "D1 = -";
+            string alpha = metric != null ? $"α = {FormatValue(metric.Alpha)}" : "α = -";
+            string beta = metric != null ? $"β = {FormatValue(metric.Beta)}" : "β = -";
+            string d2 = metric != null ? $"D2 = {FormatValue(metric.D2)}" : "D2 = -";
+            string value = metric != null ? $"KFE = {FormatValue(metric.ShannonKfe)}" : "KFE = -";
+
+            if (classIndex == 0)
+            {
+                Pz5ShannonRadiusClass0 = radius;
+                Pz5ShannonD1Class0 = d1;
+                Pz5ShannonAlphaClass0 = alpha;
+                Pz5ShannonBetaClass0 = beta;
+                Pz5ShannonD2Class0 = d2;
+                Pz5ShannonValueClass0 = value;
+            }
+            else
+            {
+                Pz5ShannonRadiusClass1 = radius;
+                Pz5ShannonD1Class1 = d1;
+                Pz5ShannonAlphaClass1 = alpha;
+                Pz5ShannonBetaClass1 = beta;
+                Pz5ShannonD2Class1 = d2;
+                Pz5ShannonValueClass1 = value;
+            }
+        }
+
+        private void SetKullbackProperties(int classIndex, Pz5RadiusMetrics? metric)
+        {
+            string radius = metric != null ? $"r = {metric.Radius}" : "r = -";
+            string value = metric != null ? $"KFE = {FormatValue(metric.KullbackKfe)}" : "KFE = -";
+            string d1 = metric != null ? $"D1 = {FormatValue(metric.D1)}" : "D1 = -";
+            string alpha = metric != null ? $"α = {FormatValue(metric.Alpha)}" : "α = -";
+            string beta = metric != null ? $"β = {FormatValue(metric.Beta)}" : "β = -";
+            string d2 = metric != null ? $"D2 = {FormatValue(metric.D2)}" : "D2 = -";
+
+            if (classIndex == 0)
+            {
+                Pz5KullbackRadiusClass0 = radius;
+                Pz5KullbackValueClass0 = value;
+                Pz5KullbackD1Class0 = d1;
+                Pz5KullbackAlphaClass0 = alpha;
+                Pz5KullbackBetaClass0 = beta;
+                Pz5KullbackD2Class0 = d2;
+            }
+            else
+            {
+                Pz5KullbackRadiusClass1 = radius;
+                Pz5KullbackValueClass1 = value;
+                Pz5KullbackD1Class1 = d1;
+                Pz5KullbackAlphaClass1 = alpha;
+                Pz5KullbackBetaClass1 = beta;
+                Pz5KullbackD2Class1 = d2;
+            }
+        }
+
+        private void ClearPz5Properties()
+        {
+            Pz5ShannonRadiusClass0 = "";
+            Pz5ShannonD1Class0 = "";
+            Pz5ShannonAlphaClass0 = "";
+            Pz5ShannonBetaClass0 = "";
+            Pz5ShannonD2Class0 = "";
+            Pz5ShannonValueClass0 = "";
+            Pz5ShannonRadiusClass1 = "";
+            Pz5ShannonD1Class1 = "";
+            Pz5ShannonAlphaClass1 = "";
+            Pz5ShannonBetaClass1 = "";
+            Pz5ShannonD2Class1 = "";
+            Pz5ShannonValueClass1 = "";
+            Pz5KullbackRadiusClass0 = "";
+            Pz5KullbackValueClass0 = "";
+            Pz5KullbackD1Class0 = "";
+            Pz5KullbackAlphaClass0 = "";
+            Pz5KullbackBetaClass0 = "";
+            Pz5KullbackD2Class0 = "";
+            Pz5KullbackRadiusClass1 = "";
+            Pz5KullbackValueClass1 = "";
+            Pz5KullbackD1Class1 = "";
+            Pz5KullbackAlphaClass1 = "";
+            Pz5KullbackBetaClass1 = "";
+            Pz5KullbackD2Class1 = "";
+            Pz5MaxRadiusText = "";
+        }
+
+        private static string FormatValue(double value) =>
+            double.IsFinite(value) ? value.ToString("0.000", CultureInfo.InvariantCulture) : "-";
 
         /// <summary>
         /// Обновляет отображение всех матриц в интерфейсе
