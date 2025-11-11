@@ -8,16 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7701aed9-3f09-4c9a-84be-59d5a212e11a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz5AccuracyMetricsCalculator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz5ExcelReportGenerator.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.baseis/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MainWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/MatrixFormatter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz2BinaryMatrixProcessor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz3ReferenceVectorCalculator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz4CodeDistanceAnalyzer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz4CodeDistanceAnalyzer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/Views/MainWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baseis/baseis.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/baseis.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz5KullbackEfficiencyCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz5KullbackEfficiencyCalculator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baseis/ViewModels/Pz6ExcelReportGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/baseis/ViewModels/Pz6ExcelReportGenerator.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,7 +105,7 @@
       <workItem from="1760436945152" duration="5513000" />
       <workItem from="1762847210169" duration="3532000" />
       <workItem from="1762850768921" duration="1120000" />
-      <workItem from="1762855091969" duration="6424000" />
+      <workItem from="1762855091969" duration="8011000" />
     </task>
     <servers />
   </component>

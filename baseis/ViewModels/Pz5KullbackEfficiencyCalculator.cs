@@ -27,7 +27,7 @@ namespace baseis.ViewModels
                 }
 
                 double fallback = hasPreviousValue ? previousValue : 0.0;
-                double value = CalculateKullbackValue(metric, fallback);
+                double value = CalculateKullbackValue(metric, fallback, 100);
                 metric.KullbackKfe = value;
 
                 if (double.IsFinite(value))
@@ -38,27 +38,27 @@ namespace baseis.ViewModels
             }
         }
 
-        private static double CalculateKullbackValue(Pz5RadiusMetrics metric, double fallbackValue)
+        private static double CalculateKullbackValue(Pz5RadiusMetrics metric, double fallbackValue, int n)
         {
-            double errorSum = metric.Alpha + metric.Beta;
-            if (errorSum <= double.Epsilon)
+            double K1plusK2 = metric.K2 + metric.K3;
+            if (K1plusK2 <= double.Epsilon)
             {
                 return fallbackValue;
             }
 
-            double numerator = 2.0 - errorSum;
+            double numerator = 2.0*n + Math.Pow(10, -2) - K1plusK2;
             if (numerator <= 0.0)
             {
                 return 0.0;
             }
 
-            double ratio = numerator / errorSum;
+            double ratio = numerator / K1plusK2;
             if (ratio <= 0.0)
             {
                 return 0.0;
             }
 
-            double result = Math.Log(ratio, 2) * (1.0 - errorSum);
+            double result = Math.Log(ratio, 2) * (1.0*n - K1plusK2) / n;
             return double.IsFinite(result) ? result : fallbackValue;
         }
     }

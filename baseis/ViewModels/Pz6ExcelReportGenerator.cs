@@ -22,6 +22,7 @@ namespace baseis.ViewModels
         private static readonly XLColor HeaderColor = XLColor.FromHtml("#0D47A1");
         private static readonly XLColor HeaderTextColor = XLColor.White;
         private static readonly XLColor TableColor = XLColor.FromHtml("#E3F2FD");
+        private static readonly XLColor HighlightColor = XLColor.FromHtml("#C5E1A5");
 
         public string GenerateReport(Pz6OptimizationResult result)
         {
@@ -41,7 +42,10 @@ namespace baseis.ViewModels
                 var optimizedMetrics = GetMetricsOrEmpty(result.Optimized.MetricsByClass, classIndex);
                 var classSheet = workbook.Worksheets.Add($"Класс {classIndex}");
 
-                FillClassSummaryTable(classSheet, classIndex, result, originalMetrics, optimizedMetrics);
+                int summaryBottomRow = FillClassSummaryTable(classSheet, classIndex, result, originalMetrics, optimizedMetrics);
+                int metricsTableBottomRow = FillOptimizedMetricsTable(classSheet, optimizedMetrics, startRow: 3, startColumn: 6);
+                int layoutBottomRow = Math.Max(summaryBottomRow, metricsTableBottomRow);
+                int chartStartRow = layoutBottomRow + 4;
 
                 var classShannonImage = CreateClassChartImage(
                     originalMetrics,
@@ -51,7 +55,7 @@ namespace baseis.ViewModels
                     "KFE",
                     new Rgba32(30, 136, 229));
 
-                InsertChartImage(classSheet, classShannonImage, 18, 1);
+                InsertChartImage(classSheet, classShannonImage, chartStartRow, 1);
 
                 var classKullbackImage = CreateClassChartImage(
                     originalMetrics,
@@ -61,7 +65,7 @@ namespace baseis.ViewModels
                     "KFE",
                     new Rgba32(239, 125, 50));
 
-                InsertChartImage(classSheet, classKullbackImage, 41, 1);
+                InsertChartImage(classSheet, classKullbackImage, chartStartRow + 25, 1);
             }
 
             workbook.SaveAs(filePath);
@@ -112,7 +116,7 @@ namespace baseis.ViewModels
             picture.MoveTo(worksheet.Cell(firstRow, firstColumn));
         }
 
-        private static void FillClassSummaryTable(
+        private static int FillClassSummaryTable(
             IXLWorksheet worksheet,
             int classIndex,
             Pz6OptimizationResult result,
@@ -155,6 +159,67 @@ namespace baseis.ViewModels
             worksheet.Range(3, 1, row - 1, 3).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
             worksheet.Range(4, 1, row - 1, 3).Style.Fill.BackgroundColor = TableColor;
             worksheet.Columns(1, 3).AdjustToContents();
+
+            return row - 1;
+        }
+
+        private static int FillOptimizedMetricsTable(
+            IXLWorksheet worksheet,
+            IReadOnlyList<Pz5RadiusMetrics> optimized,
+            int startRow,
+            int startColumn)
+        {
+            var headers = new[]
+            {
+                "r", "D1", "α", "β", "D2", "KFE (Шеннона)", "KFE (Кульбака)", "Зона", "Оптим. r"
+            };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = worksheet.Cell(startRow, startColumn + i);
+                cell.Value = headers[i];
+                cell.Style.Fill.BackgroundColor = HeaderColor;
+                cell.Style.Font.FontColor = HeaderTextColor;
+                cell.Style.Font.Bold = true;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            int? shannonBest = GetBestRadiusFromList(optimized, m => m.ShannonKfe);
+            int? kullbackBest = GetBestRadiusFromList(optimized, m => m.KullbackKfe);
+
+            int currentRow = startRow + 1;
+            foreach (var metric in optimized)
+            {
+                worksheet.Cell(currentRow, startColumn).Value = metric.Radius;
+                worksheet.Cell(currentRow, startColumn + 1).Value = metric.D1;
+                worksheet.Cell(currentRow, startColumn + 2).Value = metric.Alpha;
+                worksheet.Cell(currentRow, startColumn + 3).Value = metric.Beta;
+                worksheet.Cell(currentRow, startColumn + 4).Value = metric.D2;
+                worksheet.Cell(currentRow, startColumn + 5).Value = metric.ShannonKfe;
+                worksheet.Cell(currentRow, startColumn + 6).Value = metric.KullbackKfe;
+                worksheet.Cell(currentRow, startColumn + 7).Value = metric.IsReliable ? "Рабочая" : "";
+                worksheet.Cell(currentRow, startColumn + 8).Value = GetOptimalMarker(metric.Radius, shannonBest, kullbackBest);
+
+                if (metric.IsReliable)
+                {
+                    worksheet.Range(currentRow, startColumn, currentRow, startColumn + headers.Length - 1)
+                        .Style.Fill.BackgroundColor = HighlightColor;
+                }
+
+                worksheet.Range(currentRow, startColumn + 1, currentRow, startColumn + 6)
+                    .Style.NumberFormat.Format = "0.000";
+
+                currentRow++;
+            }
+
+            int dataEndRow = Math.Max(startRow, currentRow - 1);
+            var tableRange = worksheet.Range(startRow, startColumn, dataEndRow, startColumn + headers.Length - 1);
+            var table = tableRange.CreateTable();
+            table.Theme = XLTableTheme.TableStyleLight9;
+            table.ShowAutoFilter = true;
+
+            worksheet.Columns(startColumn, startColumn + headers.Length - 1).AdjustToContents();
+            return dataEndRow;
         }
 
         private static byte[] CreateClassChartImage(
@@ -216,34 +281,50 @@ namespace baseis.ViewModels
             double xRange = maxX - minX;
             double yRange = maxY - minY;
 
+            float plotWidth = width - marginLeft - marginRight;
+            float plotHeight = height - marginTop - marginBottom;
+            float plotBottom = marginTop + plotHeight;
+
             float TransformX(double x) =>
-                (float)(marginLeft + (x - minX) / xRange * (width - marginLeft - marginRight));
+                (float)(marginLeft + (x - minX) / xRange * plotWidth);
 
             float TransformY(double y)
             {
                 double normalized = (y - minY) / yRange;
                 double inverted = 1 - normalized;
-                return (float)(marginTop + inverted * (height - marginTop - marginBottom));
+                return (float)(marginTop + inverted * plotHeight);
             }
 
             image.Mutate(ctx =>
             {
-                ctx.Fill(new Rgba32(250, 250, 250), new RectangleF(marginLeft, marginTop, width - marginLeft - marginRight, height - marginTop - marginBottom));
+                ctx.Fill(new Rgba32(250, 250, 250), new RectangleF(marginLeft, marginTop, plotWidth, plotHeight));
                 ctx.DrawText(title, fontTitle, new Rgba32(33, 33, 33), new PointF(marginLeft, 10));
-                ctx.DrawText("r", fontAxis, new Rgba32(66, 66, 66), new PointF(width / 2f, height - marginBottom + 30));
+                ctx.DrawText("r", fontAxis, new Rgba32(66, 66, 66), new PointF(width / 2f, plotBottom + 30));
                 ctx.DrawText(yAxisLabel, fontAxis, new Rgba32(66, 66, 66), new PointF(10, marginTop - 20));
             });
 
             var axisColor = new Rgba32(0, 0, 0);
-            DrawLine(image, axisColor, 1.5f, new PointF(marginLeft, marginTop), new PointF(marginLeft, height - marginBottom));
-            DrawLine(image, axisColor, 1.5f, new PointF(marginLeft, height - marginBottom), new PointF(width - marginRight, height - marginBottom));
+            DrawLine(image, axisColor, 1.5f, new PointF(marginLeft, marginTop), new PointF(marginLeft, plotBottom));
+            DrawLine(image, axisColor, 1.5f, new PointF(marginLeft, plotBottom), new PointF(marginLeft + plotWidth, plotBottom));
+
+            foreach (var (start, end) in CalculateReliableSpans(optimized))
+            {
+                float left = TransformX(start);
+                float right = TransformX(end);
+                float rectWidth = MathF.Max(1f, right - left);
+
+                image.Mutate(ctx => ctx.Fill(new Rgba32(129, 199, 132, 90), new RectangleF(left, marginTop, rectWidth, plotHeight)));
+                var borderColor = new Rgba32(56, 142, 60);
+                DrawLine(image, borderColor, 2f, new PointF(left, marginTop), new PointF(left, plotBottom), new[] { 8f, 6f });
+                DrawLine(image, borderColor, 2f, new PointF(right, marginTop), new PointF(right, plotBottom), new[] { 8f, 6f });
+            }
 
             const int gridLines = 5;
             for (int i = 0; i <= gridLines; i++)
             {
                 double yValue = minY + i * (yRange / gridLines);
                 float y = TransformY(yValue);
-                DrawLine(image, new Rgba32(210, 210, 210), 1f, new PointF(marginLeft, y), new PointF(width - marginRight, y));
+                DrawLine(image, new Rgba32(210, 210, 210), 1f, new PointF(marginLeft, y), new PointF(marginLeft + plotWidth, y));
 
                 image.Mutate(ctx => ctx.DrawText(
                     yValue.ToString("0.00", CultureInfo.InvariantCulture),
@@ -259,13 +340,13 @@ namespace baseis.ViewModels
                 double ratio = i / (double)Math.Max(1, xTicks);
                 double radiusValue = minX + ratio * xRange;
                 float x = TransformX(radiusValue);
-                DrawLine(image, new Rgba32(210, 210, 210), 1f, new PointF(x, marginTop), new PointF(x, height - marginBottom));
+                DrawLine(image, new Rgba32(210, 210, 210), 1f, new PointF(x, marginTop), new PointF(x, plotBottom));
 
                 image.Mutate(ctx => ctx.DrawText(
                     Math.Round(radiusValue).ToString("0", CultureInfo.InvariantCulture),
                     fontTick,
                     new Rgba32(97, 97, 97),
-                    new PointF(x - 10, height - marginBottom + 10)));
+                    new PointF(x - 10, plotBottom + 10)));
             }
 
             foreach (var seriesItem in series)
@@ -466,6 +547,45 @@ namespace baseis.ViewModels
             }
 
             return bestRadius;
+        }
+
+        private static IEnumerable<(double Start, double End)> CalculateReliableSpans(IReadOnlyList<Pz5RadiusMetrics> metrics)
+        {
+            if (metrics.Count == 0)
+            {
+                yield break;
+            }
+
+            double? spanStart = null;
+            double lastRadius = metrics[0].Radius;
+
+            foreach (var metric in metrics)
+            {
+                if (metric.IsReliable)
+                {
+                    spanStart ??= metric.Radius - 0.5;
+                }
+                else if (spanStart != null)
+                {
+                    yield return (spanStart.Value, lastRadius + 0.5);
+                    spanStart = null;
+                }
+
+                lastRadius = metric.Radius;
+            }
+
+            if (spanStart != null)
+            {
+                yield return (spanStart.Value, metrics[^1].Radius + 0.5);
+            }
+        }
+
+        private static string GetOptimalMarker(int radius, int? shannonRadius, int? kullbackRadius)
+        {
+            var tags = new List<string>();
+            if (radius == shannonRadius) tags.Add("KFE E");
+            if (radius == kullbackRadius) tags.Add("KFE K");
+            return string.Join(", ", tags);
         }
     }
 }
